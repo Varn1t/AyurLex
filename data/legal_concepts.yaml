@@ -1,0 +1,395 @@
+# Concept lexicon: the bridge between how a question is asked and how a statute
+# is written.
+#
+# A vaidya asks "can I patent my family formulation?". The provision that
+# answers it is headed "What are not inventions" and never uses the word
+# "formulation". No amount of embedding tuning closes that gap reliably,
+# because the gap is not semantic drift -- it is a different register.
+#
+# So the mapping is curated data, not a prompt and not a guess:
+#   lay        -- how people actually ask, including Hindi/Devanagari forms
+#   statutory  -- the terms the drafter used, appended to the query
+#   provisions -- the corpus ids this concept is governed by
+#   rules      -- the SUTRA rules that decide it, so chat can offer a compile
+#
+# A provision id may carry a pin-cite: 'IN.PATENTS.1970::S3(p)' means the
+# concept is governed by clause (p) specifically, so the answer quotes that
+# clause rather than reciting the whole of section 3.
+#
+# Every provision id here is verified by the same loader gate as the rules:
+# scripts/verify_concepts.py fails if one stops resolving. Adding a concept is
+# a data change reviewable by a domain expert who does not read Python.
+
+- id: TK_PATENTABILITY
+  label: Patentability of traditional knowledge
+  lay:
+    - patent a traditional
+    - patent my family formulation
+    - patent an ayurvedic
+    - patent a classical formulation
+    - is my formulation patentable
+    - can i patent
+    - traditional knowledge patent
+    - पेटेंट
+    - परंपरागत ज्ञान
+    - காப்புரிமை
+    - பாரம்பரிய அறிவு
+    - என் மருந்துக்கு காப்புரிமை
+    - पेटेंट करा सकता
+    - पारंपरिक ज्ञान
+    - పేటెంట్
+    - ಪೇಟೆಂಟ್
+    - പേറ്റന്റ്
+    - পেটেন্ট
+    - પેટન્ટ
+  statutory:
+    - traditional knowledge
+    - not inventions
+    - aggregation duplication known properties traditionally known component
+  provisions: ['IN.PATENTS.1970::S3(p)']
+  rules: [IN.PAT.S3P.TK_EXCLUSION, REG.TRADITIONAL_USE_ASSET]
+
+- id: MERE_ADMIXTURE
+  label: Combinations and mere admixture
+  lay:
+    - mix two herbs
+    - combination of herbs
+    - polyherbal patent
+    - polyherbal blend
+    - polyherbal
+    - blend of known ingredients
+    - blend an invention
+    - combination an invention
+    - synergy
+    - is my combination an invention
+    - இரண்டு மூலிகைகள்
+    - மூலிகை கலவை
+    - दो जड़ी बूटी
+    - मिश्रण
+  statutory:
+    - substance obtained mere admixture aggregation properties components
+  provisions: ['IN.PATENTS.1970::S3(e)']
+  rules: [IN.PAT.S3E.MERE_ADMIXTURE]
+
+- id: DISCLOSE_ORIGIN
+  label: Disclosure of source and geographical origin
+  lay:
+    - disclose where the plant came from
+    - where the material came from
+    - do i declare the source
+    - geographical origin
+    - source of biological material
+    - மூலம் வெளியிட
+    - புவியியல் மூலம்
+    - स्रोत बताना
+    - भौगोलिक उत्पत्ति
+  statutory:
+    - disclose source geographical origin biological material specification
+  provisions: [IN.PATENTS.1970::S10]
+  rules: [IN.PAT.S10.DISCLOSE_BIOLOGICAL_ORIGIN]
+
+- id: FOREIGN_FILING
+  label: Filing outside India
+  lay:
+    - file abroad
+    - file outside india
+    - file in america first
+    - foreign filing
+    - file a patent overseas
+    - can i file first in another country
+    - file in america before india
+    - file in us before india
+    - file first outside india
+    - file overseas before india
+    - வெளிநாட்டில் விண்ணப்பிக்க
+    - வெளிநாடு
+    - विदेश में दाखिल
+    - विदेश में आवेदन
+  statutory:
+    - person resident india written permit controller application outside india
+  provisions: [IN.PATENTS.1970::S39]
+  rules: [IN.PAT.S39.FOREIGN_FILING_PERMISSION]
+
+- id: FOREIGN_APP_INFO
+  label: Information about corresponding foreign applications
+  lay:
+    - tell the controller about foreign applications
+    - do i report my other applications
+    - corresponding applications abroad
+  statutory:
+    - information undertaking regarding foreign applications statement particulars
+  provisions: [IN.PATENTS.1970::S8]
+  rules: [IN.PAT.S8.FOREIGN_APPLICATION_INFO]
+
+- id: NBA_APPROVAL
+  label: Approval before IP on Indian biological resources
+  lay:
+    - permission before patent using indian plants
+    - do i need approval to use indian herbs
+    - national biodiversity authority
+    - nba approval
+    - use indian plants in my product
+    - access to biological resources
+    - தேசிய உயிரிப் பன்முகத்தன்மை ஆணையம்
+    - அனுமதி தேவையா
+    - இந்திய மூலிகை
+    - राष्ट्रीय जैव विविधता प्राधिकरण
+    - अनुमति चाहिए
+  statutory:
+    - apply intellectual property right invention based biological resource
+      obtained india previous approval national biodiversity authority
+  provisions: [IN.BDA.2002::S6]
+  rules: [IN.BDA.S6.IPR_PRIOR_APPROVAL]
+
+- id: SBB_INTIMATION
+  label: Prior intimation to the State Biodiversity Board
+  lay:
+    - state biodiversity board
+    - do i inform the state board
+    - commercial use of a biological resource
+    - am i exempt as a vaidya
+    - vaid hakim exemption
+    - மாநில உயிரிப் பன்முகத்தன்மை வாரியம்
+    - राज्य जैव विविधता बोर्ड
+  statutory:
+    - prior intimation state biodiversity board commercial utilisation
+      vaids hakims practising indigenous medicine
+  provisions: [IN.BDA.2002::S7]
+  rules: [IN.BDA.S7.PRIOR_INTIMATION_SBB]
+
+- id: BENEFIT_SHARING
+  label: Benefit sharing
+  lay:
+    - benefit sharing
+    - royalty to communities
+    - what do i owe the community
+    - பயன் பகிர்வு
+    - சமூகத்திற்கு பங்கு
+    - लाभ साझाकरण
+    - लाभ का बंटवारा
+  statutory:
+    - equitable sharing benefits accessed biological resources
+  provisions: [IN.BDA.2002::S21]
+  rules: [IN.BDA.S21.BENEFIT_SHARING]
+
+- id: DISEASE_CLAIMS
+  label: Advertising a treatment claim
+  lay:
+    - advertise that my product cures
+    - can i say it cures
+    - claim it treats diabetes
+    - claim treats
+    - claim cures
+    - say it treats
+    - treats epilepsy
+    - advertise cures
+    - marketing claim
+    - label claim
+    - can i advertise
+    - इलाज का दावा
+    - நோயை குணப்படுத்தும் என்று விளம்பரம்
+    - விளம்பரம் செய்ய
+    - குணப்படுத்தும்
+    - इलाज का विज्ञापन
+    - विज्ञापन कर सकता
+  statutory:
+    - advertisement drug diagnosis cure mitigation treatment prevention
+      disease disorder condition specified schedule
+  provisions: ['IN.DMR.1954::S3(d)']
+  rules: [IN.DMR.S3.SCHEDULED_DISEASE_CLAIM]
+
+- id: MISLEADING_ADS
+  label: Misleading advertisements
+  lay:
+    - exaggerated claim
+    - is my advertisement misleading
+    - false claim
+    - தவறான விளம்பரம்
+    - भ्रामक विज्ञापन
+  statutory:
+    - false impression true character drug false claim misleading material particular
+  provisions: [IN.DMR.1954::S4]
+  rules: [IN.DMR.S4.MISLEADING_CLAIM_RISK]
+
+- id: TRADEMARK_GROUNDS
+  label: Registering a brand name
+  lay:
+    - brand name
+    - trade mark
+    - trademark
+    - trademarks
+    - trademark my product name
+    - register the name
+    - stop someone copying my name
+    - is my name too descriptive
+    - logo registration
+    - வர்த்தக முத்திரை
+    - பிராண்ட் பெயர்
+    - ट्रेडमार्क
+    - व्यापार चिह्न
+    - ब्रांड नाम
+  statutory:
+    - absolute grounds refusal registration devoid distinctive character
+      indications designate kind quality quantity intended purpose
+  provisions: [IN.TM.1999::S9]
+  rules: []
+
+- id: GI_PROTECTION
+  label: Geographical indications
+  lay:
+    - geographical indication
+    - geographical indications
+    - gi
+    - protect a regional product
+    - gi tag
+    - gi registration
+    - register a gi
+    - product from my region
+    - புவிசார் குறியீடு
+    - जीआई टैग
+    - भौगोलिक संकेत
+  statutory:
+    - prohibition registration certain geographical indications deceive confusion generic
+  provisions: [IN.GI.1999::S9]
+  rules: []
+
+- id: PLANT_VARIETY
+  label: Plant varieties and farmers' rights
+  lay:
+    - register a plant variety
+    - new cultivar
+    - farmers rights
+    - seed variety protection
+    - தாவர வகை பதிவு
+    - விவசாயிகள் உரிமை
+    - पौधा किस्म
+    - किसानों के अधिकार
+  statutory:
+    - registration varieties farmers right breeder
+  provisions: [IN.PPVFR.2001::S39]
+  rules: []
+
+# ---------------------------------------------------------------------------
+# International layer.
+#
+# SIH26045 requires the national and the international regimes to be kept
+# "visibly separate" so that answers are never conflated. These concepts point
+# only at non-IN instruments; the retriever tags the jurisdiction of what they
+# return, and a treaty record carries a note saying what force it actually has
+# in India, because "India is a Party to Nagoya" and "you can sue on Nagoya in
+# Delhi" are very different statements.
+# ---------------------------------------------------------------------------
+
+- id: TRIPS_PATENTABILITY
+  label: TRIPS minimum standards on patentable subject matter
+  lay:
+    - trips
+    - trips agreement
+    - wto patent
+    - international minimum standard
+    - patentable subject matter internationally
+    - is india obliged
+  statutory:
+    - patentable subject matter
+    - patents shall be available for any inventions
+    - plants and animals other than micro-organisms
+  provisions: ['WTO.TRIPS.1994::A27']
+
+- id: TRIPS_GI
+  label: TRIPS protection of geographical indications
+  lay:
+    - gi internationally
+    - international gi protection
+    - protect my gi abroad
+    - trips geographical indication
+  statutory:
+    - protection of geographical indications
+    - misleading the public as to the geographical origin
+  provisions: ['WTO.TRIPS.1994::A22']
+
+- id: CBD_SOVEREIGNTY
+  label: Sovereign rights over genetic resources (CBD)
+  lay:
+    - convention on biological diversity
+    - cbd
+    - sovereign rights over genetic resources
+    - international access to genetic resources
+  statutory:
+    - access to genetic resources
+    - sovereign rights of states over their natural resources
+    - prior informed consent of the contracting party providing
+  provisions: ['CBD.1992::A15']
+
+- id: NAGOYA_ABS
+  label: Nagoya Protocol access and benefit-sharing
+  lay:
+    - nagoya
+    - nagoya protocol
+    - international benefit sharing
+    - benefit sharing abroad
+    - prior informed consent
+    - mutually agreed terms
+  statutory:
+    - fair and equitable benefit-sharing
+    - access to traditional knowledge associated with genetic resources
+    - mutually agreed terms
+  provisions:
+    - 'CBD.NAGOYA.2010::A5'
+    - 'CBD.NAGOYA.2010::A6'
+    - 'CBD.NAGOYA.2010::A7'
+
+- id: GRATK_DISCLOSURE
+  label: WIPO GRATK Treaty disclosure requirement
+  lay:
+    - gratk
+    - wipo treaty
+    - wipo treaty on genetic resources
+    - international disclosure requirement
+    - new wipo treaty
+    - genetic resources treaty
+  statutory:
+    - disclosure requirement
+    - country of origin of the genetic resources
+    - indigenous peoples or local community
+  provisions:
+    - 'WIPO.GRATK.2024::A3'
+    - 'WIPO.GRATK.2024::A5'
+
+- id: PCT_FILING
+  label: International patent application under the PCT
+  lay:
+    - pct
+    - pct application
+    - international patent application
+    - patent in multiple countries
+    - patent in several countries
+    - file internationally
+    - patent abroad
+  statutory:
+    - international application
+    - designated offices
+    - filing date and effects of the international application
+  provisions:
+    - 'WIPO.PCT.1970::A3'
+    - 'WIPO.PCT.1970::A11'
+
+- id: US_BOTANICAL_DRUG
+  label: US market access for a botanical drug (FDA)
+  lay:
+    - fda
+    - us fda
+    - fda approval
+    - sell in the us
+    - sell it in america
+    - botanical drug
+    - ind application
+    - us market
+  statutory:
+    - must submit an NDA and obtain Agency approval prior to marketing
+    - intended for use in diagnosing curing mitigating or treating disease
+    - botanical drug product
+    - OTC drug monograph
+  provisions:
+    - 'US.FDA.BOTANICAL::P7'
+    - 'US.FDA.BOTANICAL::P8'
+    - 'US.FDA.BOTANICAL::P6'

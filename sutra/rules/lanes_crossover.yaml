@@ -1,0 +1,169 @@
+# SUTRA -- cross-lane rules.
+#
+# This file carries the product thesis in executable form. IN.PAT.S3P.TK_EXCLUSION
+# (in_patents.yaml) and REG.TRADITIONAL_USE_ASSET below fire on the SAME facts
+# and cite the SAME provision, with opposite consequences: documented traditional
+# use is what destroys the composition claim and what evidences the traditional-use
+# regulatory route. A chatbot answers one question at a time and never notices.
+# A compiler modelling both lanes over one citation graph cannot miss it.
+
+- id: REG.TRADITIONAL_USE_ASSET
+  jurisdiction: IN
+  lane: REGULATORY
+  instrument: "The Patents Act, 1970"
+  provision: "Section 3(p) -- read as evidence of traditional use"
+  severity: OPPORTUNITY
+  effective_from: 2003-05-20
+  effective_to: null
+  when:
+    all:
+      - fact: prior_art.classical_match_type
+        in: [EXACT, SUBSET_OF_CLASSICAL, KNOWN_PROPERTY_AGGREGATION]
+      - fact: traditional_use.documented
+        eq: true
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.PATENTS.1970::S3
+      clause: p
+      provision: "Section 3(p)"
+      anchor: >-
+        an invention which, in effect, is traditional knowledge or which is an
+        aggregation or duplication of known properties of traditionally known
+        component or components
+  statement_template: >-
+    The same documented traditional use that excludes this composition from
+    patentability under Section 3(p) is an evidentiary asset in the regulatory
+    lane. {{ traditional_use.source }} establishes long-standing use of
+    {{ resolution.taxa }}, which is the evidence base that traditional-use
+    registration routes consume, and which also supports defensive publication
+    so the formulation cannot be appropriated by a third party abroad. Treat the
+    classical record as a filing asset, not only as a patent liability.
+  autofix:
+    - id: BUILD_TRADITIONAL_USE_DOSSIER
+      description: >-
+        Compile the documented-use dossier once and reuse it: as prior-art
+        evidence for defensive publication, and as the evidence base for a
+        traditional-use market authorisation in each destination market.
+      expected_effect: >-
+        Converts a patent blocker into a filed evidentiary asset. The
+        destination regime's own requirements must be verified against that
+        regime's primary sources before this is relied on.
+      emits_protocol: protocols/traditional_use_dossier.md
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/novel_process_extract.json
+      expect_fires: false
+
+- id: IN.PRIORART.TKDL_ADVERSE_OUTCOME
+  jurisdiction: IN
+  lane: PATENT
+  instrument: "TKDL prior-art outcome record"
+  provision: "Patent office outcome on cited TKDL prior art"
+  severity: WARNING
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: prior_art.tkdl_adverse_outcome
+        eq: true
+      - fact: filing.intent
+        not_in: [NONE]
+  citations:
+    - kind: PRIOR_ART
+      corpus_id: TKDL.OUT::from_fact
+      provision: "TKDL annexure record"
+      anchor: "resolved from fact at emit time"
+      from_fact: prior_art.tkdl_top
+  statement_template: >-
+    A patent application in the same space has already been disposed of adversely
+    after TKDL prior art was cited against it: application
+    {{ prior_art.tkdl_top.application_no }} --
+    "{{ prior_art.tkdl_top.title }}" -- outcome
+    {{ prior_art.tkdl_top.outcome }}. Overlap with the present formulation was
+    matched on {{ prior_art.tkdl_top.matched_terms }}. Examine this record before
+    drafting; the same prior art is available to the examiner.
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/no_filing_intent.json
+      expect_fires: false
+
+- id: IN.RESOLVER.AMBIGUOUS_TAXON
+  jurisdiction: IN
+  lane: PATENT
+  instrument: "The Patents Act, 1970"
+  provision: "Section 10(4)(d)(D)"
+  severity: WARNING
+  effective_from: null
+  effective_to: null
+  when:
+    any:
+      - fact: resolution.ambiguous_count
+        gte: 1
+      - fact: resolution.unresolved_count
+        gte: 1
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.PATENTS.1970::S10
+      provision: "Section 10(4)(d)(D)"
+      anchor: >-
+        disclose the source and geographical origin of the biological material
+        in the specification, when used in an invention
+  statement_template: >-
+    {{ resolution.ambiguous_count }} ingredient name(s) resolved ambiguously
+    ({{ resolution.ambiguous_names }}) and
+    {{ resolution.unresolved_count }} did not resolve at all
+    ({{ resolution.unresolved_names }}). Botanical synonymy is genuinely
+    contested for several drugs and regional substitutes differ, so the compiler
+    has not guessed. This matters legally as well as scientifically: the source
+    and geographical origin of the biological material must be disclosed in the
+    specification, and an unresolved taxon cannot be disclosed correctly.
+    Confirm the intended taxon before filing.
+  autofix:
+    - id: CONFIRM_TAXON_WITH_USER
+      description: >-
+        Present the candidate taxa to the user and record the confirmed
+        selection in the resolution log, so the choice is auditable rather than
+        inferred.
+      expected_effect: "Resolution path becomes USER_CONFIRMED and the warning clears"
+  test_cases:
+    - fixture: fixtures/ambiguous_brahmi.json
+      expect_fires: true
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: false
+
+- id: IN.SOURCING.RESTRICTED_SPECIES
+  jurisdiction: IN
+  lane: ACCESS
+  instrument: "The Biological Diversity Act, 2002"
+  provision: "Section 6(1)"
+  severity: WARNING
+  effective_from: null
+  effective_to: null
+  when:
+    any:
+      - fact: ingredients.has_cites_listed
+        eq: true
+      - fact: ingredients.has_threatened
+        eq: true
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.BDA.2002::S6
+      provision: "Section 6(1)"
+      anchor: >-
+        for any invention based on any research or information on a biological
+        resource obtained from India
+  statement_template: >-
+    Constituents carry conservation or trade-control flags in the curated taxa
+    dataset ({{ ingredients.schedule_flags }}). Sourcing evidence for these
+    species should be assembled before filing or export, because the access
+    approval and the trade permits are assessed on the same sourcing record.
+    The specific listing status of each species must be confirmed against the
+    current notification for the destination market -- the compiler flags the
+    exposure and abstains from stating the listing itself.
+  test_cases:
+    - fixture: fixtures/restricted_species.json
+      expect_fires: true
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: false

@@ -1,0 +1,52 @@
+{
+  "name": "Sarpagandha Vati",
+  "ingredients": [
+    {
+      "raw_name": "Sarpagandha",
+      "part_used": "root",
+      "proportion": {
+        "value": 1,
+        "unit": "part"
+      },
+      "is_cultivated": false
+    },
+    {
+      "raw_name": "Kuth",
+      "part_used": "root",
+      "proportion": {
+        "value": 1,
+        "unit": "part"
+      },
+      "is_cultivated": false
+    }
+  ],
+  "process": {
+    "summary": "Sun-dried fruits, deseeded, pulverised and sieved through mesh 80.",
+    "has_non_obvious_step": false,
+    "novel_steps": []
+  },
+  "dosage_form": "churna",
+  "indications": [
+    "digestive support",
+    "general weakness"
+  ],
+  "marketing_claims": [],
+  "target_markets": [
+    "IN",
+    "US",
+    "EP"
+  ],
+  "filing_intent": "IN_FIRST",
+  "claim_types": [
+    "composition"
+  ],
+  "applicant_type": "small_entity",
+  "applicant_is_indian_resident": true,
+  "evidence": {
+    "has_synergy_data": false,
+    "has_clinical_data": false,
+    "has_documented_traditional_use": true,
+    "nba_approval_obtained": false,
+    "foreign_filing_permit": false
+  }
+}

@@ -1,0 +1,249 @@
+# SUTRA -- The Patents Act, 1970
+#
+# Every anchor below is a verbatim span from Dataset/Patents Act 1970.pdf as
+# extracted into corpus/provisions.jsonl. The loader re-checks each one on
+# every run; if an anchor stops matching the primary source, the rule is
+# demoted to UNVERIFIED and cannot emit. Nothing here is written from memory.
+#
+# effective_from values are taken from the amendment footnotes captured in the
+# same PDF (see amendment_notes on each provision record), not from recall.
+
+- id: IN.PAT.S3P.TK_EXCLUSION
+  jurisdiction: IN
+  lane: PATENT
+  instrument: "The Patents Act, 1970"
+  provision: "Section 3(p)"
+  severity: BLOCKER
+  # Clauses (j)-(p) were inserted by Act 38 of 2002, s. 4, w.e.f. 20-5-2003.
+  # Footnote captured at corpus/provisions.jsonl IN.PATENTS.1970::S3.
+  effective_from: 2003-05-20
+  effective_to: null
+  when:
+    all:
+      - fact: prior_art.classical_match_type
+        in: [EXACT, SUBSET_OF_CLASSICAL, KNOWN_PROPERTY_AGGREGATION]
+      - fact: filing.seeks_composition_claim
+        eq: true
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.PATENTS.1970::S3
+      clause: p
+      provision: "Section 3(p)"
+      anchor: >-
+        an invention which, in effect, is traditional knowledge or which is an
+        aggregation or duplication of known properties of traditionally known
+        component or components
+  statement_template: >-
+    The composition as claimed is matter already described in the traditional
+    corpus ({{ prior_art.classical_basis }}). Under Section 3(p) of the Patents
+    Act, 1970, subject matter which in effect is traditional knowledge, or an
+    aggregation or duplication of known properties of traditionally known
+    components, is not an invention. A composition claim over
+    {{ resolution.taxa }} is therefore excluded from patentability in India.
+  autofix:
+    - id: PIVOT_TO_PROCESS_CLAIM
+      description: >-
+        Redirect the claim set to the novel process step(s) rather than to the
+        composition. Section 3(p) bites on what the composition is, not on how
+        a non-obvious process makes it.
+      preconditions:
+        - fact: process.has_non_obvious_step
+          eq: true
+      sets_facts:
+        filing.seeks_composition_claim: false
+        filing.seeks_process_claim: true
+      expected_effect: "IN.PAT.S3P.TK_EXCLUSION no longer fires"
+    - id: ESTABLISH_SYNERGY
+      description: >-
+        Generate evidence of a synergistic (non-additive) effect so the claimed
+        combination is no longer an aggregation of known properties, then
+        recompile.
+      sets_facts:
+        evidence.has_synergy_data: true
+        prior_art.classical_match_type: NONE
+      expected_effect: "Removes the aggregation limb of the exclusion"
+      emits_protocol: protocols/synergy_isobologram.md
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/novel_process_extract.json
+      expect_fires: false
+
+- id: IN.PAT.S3E.MERE_ADMIXTURE
+  jurisdiction: IN
+  lane: PATENT
+  instrument: "The Patents Act, 1970"
+  provision: "Section 3(e)"
+  severity: BLOCKER
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: filing.seeks_composition_claim
+        eq: true
+      - fact: evidence.has_synergy_data
+        eq: false
+      - fact: ingredients.count
+        gte: 2
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.PATENTS.1970::S3
+      clause: e
+      provision: "Section 3(e)"
+      anchor: >-
+        a substance obtained by a mere admixture resulting only in the
+        aggregation of the properties of the components thereof
+  statement_template: >-
+    {{ formulation.name }} is claimed as a composition of {{ ingredients.count }}
+    known constituents with no synergy evidence on record. Under Section 3(e) of
+    the Patents Act, 1970 a substance obtained by a mere admixture resulting only
+    in the aggregation of the properties of its components is not an invention.
+    Evidence of a non-additive effect is what separates a formulation from an
+    admixture.
+  autofix:
+    - id: ESTABLISH_SYNERGY
+      description: >-
+        Run a factorial or isobolographic study showing the combination exceeds
+        the additive effect of its constituents, and file the data with the
+        specification.
+      sets_facts:
+        evidence.has_synergy_data: true
+      expected_effect: "IN.PAT.S3E.MERE_ADMIXTURE no longer fires"
+      emits_protocol: protocols/synergy_isobologram.md
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/synergy_evidenced.json
+      expect_fires: false
+
+- id: IN.PAT.S10.DISCLOSE_BIOLOGICAL_ORIGIN
+  jurisdiction: IN
+  lane: PATENT
+  instrument: "The Patents Act, 1970"
+  provision: "Section 10(4)(d)(D)"
+  severity: INFO
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: bioresource.uses_indian_biological_resource
+        eq: true
+      - fact: filing.intent
+        not_in: [NONE]
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.PATENTS.1970::S10
+      provision: "Section 10(4)(d)(D)"
+      anchor: >-
+        disclose the source and geographical origin of the biological material
+        in the specification, when used in an invention
+  statement_template: >-
+    The specification must disclose the source and geographical origin of the
+    biological material used in the invention. This formulation uses
+    {{ bioresource.indian_count }} biological resource(s) of Indian origin
+    ({{ resolution.taxa }}), so this disclosure is a drafting requirement, not
+    an optional annexure.
+  obligation:
+    duty: >-
+      Disclose the source and geographical origin of each biological material
+      used, in the complete specification.
+    discharged_by: "Complete specification -- source and geographical origin statement"
+    when: "at filing of the complete specification"
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/no_filing_intent.json
+      expect_fires: false
+
+- id: IN.PAT.S39.FOREIGN_FILING_PERMISSION
+  jurisdiction: IN
+  lane: PATENT
+  instrument: "The Patents Act, 1970"
+  provision: "Section 39"
+  severity: BLOCKER
+  # Section 39 was substituted by Act 15 of 2005, s. 31, w.e.f. 1-1-2005.
+  effective_from: 2005-01-01
+  effective_to: null
+  when:
+    all:
+      - fact: filing.applicant_is_indian_resident
+        eq: true
+      - fact: filing.foreign_first
+        eq: true
+      - fact: evidence.foreign_filing_permit
+        eq: false
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.PATENTS.1970::S39
+      provision: "Section 39(1)"
+      anchor: >-
+        No person resident in India shall, except under the authority of a
+        written permit sought in the manner prescribed and granted by or on
+        behalf of the Controller, make or cause to be made any application
+        outside India for the grant of a patent for an invention
+  statement_template: >-
+    The applicant is resident in India and the declared filing route is
+    {{ filing.intent }}, but no foreign filing permit is recorded. Section 39 of
+    the Patents Act, 1970 bars a person resident in India from making an
+    application outside India without either a written permit from the
+    Controller, or an Indian application for the same invention filed not less
+    than six weeks earlier with no secrecy direction in force.
+  autofix:
+    - id: FILE_IN_FIRST
+      description: >-
+        File the Indian application first and observe the statutory interval
+        before any application outside India.
+      sets_facts:
+        filing.foreign_first: false
+        filing.intent: IN_FIRST
+      expected_effect: "IN.PAT.S39.FOREIGN_FILING_PERMISSION no longer fires"
+    - id: OBTAIN_FFL_PERMIT
+      description: >-
+        Apply to the Controller for written permission to file outside India
+        before making the foreign application.
+      sets_facts:
+        evidence.foreign_filing_permit: true
+      expected_effect: "Permit on record satisfies the section"
+  test_cases:
+    - fixture: fixtures/foreign_first_no_permit.json
+      expect_fires: true
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: false
+
+- id: IN.PAT.S8.FOREIGN_APPLICATION_INFO
+  jurisdiction: IN
+  lane: PATENT
+  instrument: "The Patents Act, 1970"
+  provision: "Section 8"
+  severity: INFO
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: filing.targets_foreign_market
+        eq: true
+      - fact: filing.intent
+        not_in: [NONE]
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.PATENTS.1970::S8
+      provision: "Section 8(1)"
+      anchor: >-
+        a statement setting out detailed particulars of such application
+  statement_template: >-
+    Foreign markets are targeted ({{ filing.target_markets }}). Where a
+    corresponding application is prosecuted outside India, Section 8 of the
+    Patents Act, 1970 requires a statement setting out detailed particulars of
+    that application, together with an undertaking to keep the Controller
+    informed. This is a continuing duty, not a one-time form.
+  obligation:
+    duty: >-
+      File particulars of every corresponding foreign application and keep the
+      Controller informed for the life of the Indian prosecution.
+    discharged_by: "Statement and undertaking regarding foreign applications"
+    when: "at filing and continuing until grant"
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/no_filing_intent.json
+      expect_fires: false

@@ -1,0 +1,22 @@
+# AI tool config folders — never committed
+.claude/
+.codex/
+.gemini/
+.ai/
+.obsidian/
+.cursor/
+.windsurf/
+
+# Local drafts and generated artifacts
+_drafts/
+
+# Generated corpus (rebuild with: python samhita/ingest.py)
+corpus/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/

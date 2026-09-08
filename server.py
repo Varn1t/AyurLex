@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import sys
 import uuid
+from contextlib import asynccontextmanager
 from datetime import date
 from pathlib import Path
 
@@ -23,25 +24,9 @@ from core.schema import Severity  # noqa: E402
 from rag.answer import pick_backend  # noqa: E402
 from rag.chat import Session, respond  # noqa: E402
 
-app = FastAPI(title="IP-SAKTI Sahayak")
 
-SESSIONS: dict[str, Session] = {}
-UI = ROOT / "web" / "chat.html"
-
-
-class Ask(BaseModel):
-    message: str
-    session_id: str | None = None
-    as_of: str | None = None
-
-
-@app.get("/", response_class=HTMLResponse)
-def index() -> str:
-    return UI.read_text(encoding="utf-8")
-
-
-@app.on_event("startup")
-def _boot() -> None:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """Bring Ollama up and page the model in before the first question.
 
     A local model pays roughly half a minute to load on its first call. Paying
@@ -62,6 +47,24 @@ def _boot() -> None:
             print(f"  ollama unavailable ({e}) — falling back to extractive")
 
     threading.Thread(target=warm, daemon=True).start()
+    yield
+
+
+app = FastAPI(title="IP-SAKTI Sahayak", lifespan=lifespan)
+
+SESSIONS: dict[str, Session] = {}
+UI = ROOT / "web" / "chat.html"
+
+
+class Ask(BaseModel):
+    message: str
+    session_id: str | None = None
+    as_of: str | None = None
+
+
+@app.get("/", response_class=HTMLResponse)
+def index() -> str:
+    return UI.read_text(encoding="utf-8")
 
 
 @app.get("/api/health")
@@ -247,3 +250,9 @@ def provision(corpus_id: str) -> JSONResponse:
         "authority_rank": r["authority_rank"],
         "amendment_notes": r.get("amendment_notes", []),
     })
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=False)

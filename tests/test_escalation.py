@@ -1,4 +1,4 @@
-"""SAMPARK — escalation must stay deterministic, cited, and private.
+"""Escalation — escalation must stay deterministic, cited, and private.
 
 Three properties are load-bearing and each is pinned here:
 
@@ -14,7 +14,7 @@ import pytest
 
 from core.compiler import compile_formulation
 from core.schema import Formulation
-from sampark.escalate import (
+from escalation.escalate import (
     TRIGGERS,
     assess,
     load_registry,

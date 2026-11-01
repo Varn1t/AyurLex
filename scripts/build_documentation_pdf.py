@@ -103,10 +103,10 @@ def measured() -> dict:
     import json
     from collections import Counter
 
-    from sambandha.graph import load_graph
-    from sampark.escalate import load_registry
-    from samhita.index import load_corpus
-    from sutra.loader import load_rules
+    from graph.graph import load_graph
+    from escalation.escalate import load_registry
+    from sources.index import load_corpus
+    from compliance.loader import load_rules
 
     corpus = load_corpus()
     rules = load_rules()

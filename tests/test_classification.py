@@ -1,4 +1,4 @@
-"""VARGIKARANA: the regulatory classification layer.
+"""Classification: the regulatory classification layer.
 
 The category decides the IP posture, so a wrong category is a wrong answer
 about patentability. These tests pin the decision order, the refusal to guess
@@ -10,7 +10,7 @@ from __future__ import annotations
 import pytest
 
 from rag.chat import Session, answer_to_pending, respond
-from vargikarana.classify import (
+from classification.classify import (
     ClassIndex,
     Classification,
     classification_payload,
@@ -21,7 +21,7 @@ from vargikarana.classify import (
 
 # --------------------------------------------------------------- the data ---
 def test_every_category_resolves_against_the_corpus():
-    """The same gate the SUTRA rules and RAG concepts pass. A category citing
+    """The same gate the compliance rules and RAG concepts pass. A category citing
     a provision that does not exist must fail the build, not cite nothing."""
     assert load_classes().problems == []
 

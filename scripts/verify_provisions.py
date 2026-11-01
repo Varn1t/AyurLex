@@ -24,9 +24,9 @@ if hasattr(sys.stdout, "reconfigure"):
 
 import pymupdf  # noqa: E402
 
-from samhita.ingest import DATASET, page_body_text, repair_text  # noqa: E402
-from samhita.index import load_corpus  # noqa: E402
-from sutra.loader import load_rules  # noqa: E402
+from sources.ingest import DATASET, page_body_text, repair_text  # noqa: E402
+from sources.index import load_corpus  # noqa: E402
+from compliance.loader import load_rules  # noqa: E402
 
 
 def norm(s: str) -> str:

@@ -1,4 +1,4 @@
-# SAMBANDHA — curated cross-instrument links.
+# Knowledge graph — curated cross-instrument links.
 #
 # Everything else in the knowledge graph is derived mechanically: a provision
 # belongs to its instrument, a rule cites what its YAML declares, a concept
@@ -12,7 +12,7 @@
 # sharing obligations" is a legal proposition, not a string match, and an
 # assistant that asserts it must be able to show why.
 #
-# So every link is held to the same gate as a SUTRA rule:
+# So every link is held to the same gate as a compliance rule:
 #
 #   * both endpoints must resolve to real extracted provisions, and
 #   * each declared anchor must be a verbatim substring of its endpoint.

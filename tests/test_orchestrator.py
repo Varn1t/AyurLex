@@ -1,4 +1,4 @@
-"""YUKTI — the orchestrator must stay a plan, not an improviser.
+"""Planner — the orchestrator must stay a plan, not an improviser.
 
 The claim being pinned: the plan is deterministic, bounded and printable
 before anything runs; the composition assembles sections rather than
@@ -11,7 +11,7 @@ from datetime import date
 
 import pytest
 
-from yukti.orchestrate import MAX_STEPS, compose, plan, run, split_layers
+from planner.orchestrate import MAX_STEPS, compose, plan, run, split_layers
 
 
 AS_OF = date(2026, 9, 6)
@@ -153,7 +153,7 @@ def test_the_trace_records_every_step(cross_layer):
 
 
 def test_the_plan_can_be_printed_before_it_runs():
-    from yukti.orchestrate import Trace
+    from planner.orchestrate import Trace
 
     q = "how does TRIPS relate to the Patents Act"
     lines = Trace(question=q, steps=plan(q)).lines()
@@ -170,7 +170,7 @@ def test_compose_never_writes_across_sections(cross_layer):
 
 
 def test_empty_trace_composes_to_an_honest_message():
-    from yukti.orchestrate import Trace
+    from planner.orchestrate import Trace
 
     assert "could not build a plan" in compose(Trace(question="", steps=[]))
 

@@ -53,11 +53,11 @@ def _deterministic_backend(intent: str) -> str:
     true: three of these paths never call a model at all, and that is the
     strongest single claim the product makes."""
     return {
-        "CLASSIFY": "vargikarana classifier (deterministic)",
-        "ESCALATE": "sampark escalation (deterministic)",
-        "GRAPH": "sambandha knowledge graph (deterministic)",
-        "ORCHESTRATE": "yukti orchestrator (deterministic plan)",
-    }.get(intent, "sutra rule engine (deterministic)")
+        "CLASSIFY": "classification classifier (deterministic)",
+        "ESCALATE": "escalation escalation (deterministic)",
+        "GRAPH": "graph knowledge graph (deterministic)",
+        "ORCHESTRATE": "planner orchestrator (deterministic plan)",
+    }.get(intent, "compliance rule engine (deterministic)")
 
 
 def walk_payload(walk) -> dict:
@@ -152,7 +152,7 @@ def events(message: str, session, sid: str) -> Iterator[str]:
     # under separate authorities.
     is_multi = False
     if intent == "ASK" and not (is_escalate or is_graph or is_classify):
-        from yukti.orchestrate import plan as build_plan
+        from planner.orchestrate import plan as build_plan
 
         is_multi = len([s for s in build_plan(message, session=session)
                         if s.tool in ("ask", "graph")]) >= 2
@@ -174,12 +174,12 @@ def events(message: str, session, sid: str) -> Iterator[str]:
         if reply.compile_result is not None:
             payload.update(compile_payload(reply.compile_result))
         if getattr(reply, "classification", None) is not None:
-            from vargikarana.classify import classification_payload
+            from classification.classify import classification_payload
 
             payload["classification"] = classification_payload(
                 reply.classification)
         if getattr(reply, "referral", None) is not None:
-            from sampark.escalate import payload as referral_payload
+            from escalation.escalate import payload as referral_payload
 
             payload["referral"] = referral_payload(reply.referral)
         if getattr(reply, "path", None) is not None:

@@ -20,42 +20,46 @@ something a lower layer has not already proved.</b></p>
                  web/chat.html                   cli.py   server.py
                           |
   ------------------------+------------------------------------------
-  ORCHESTRATION  YUKTI   deterministic plan, typed tools, trace
-                 CHAT    intent routing, session state, follow-ups
+  ORCHESTRATION  PLANNER         deterministic plan, typed tools, trace
+                 CHAT            intent routing, session state, follow-ups
                           |
   ------------------------+------------------------------------------
-  REASONING      SUTRA        rules as data       VARGIKARANA  category
-                 NIYAMA       obligations         SAMBANDHA    graph
-                 SETU         jurisdiction matrix SAMPARK      escalation
-                 RESOLVER     name -> taxon       RAG          retrieval
+  REASONING      RULES           rules as data
+                 OBLIGATIONS     who must do what, and when
+                 JURISDICTIONS   jurisdiction matrix
+                 CLASSIFICATION  regulatory category
+                 GRAPH           knowledge graph
+                 ESCALATION      route to a human
+                 RESOLVER        name -> taxon
+                 RAG             retrieval
                           |
   ------------------------+------------------------------------------
-  VERIFICATION   PRAMANA  citation gate  ·  loader gates  ·  schema
+  VERIFICATION   CITATION GATE   ·  loader gates  ·  schema
                           |
   ------------------------+------------------------------------------
-  EVIDENCE       SAMHITA  corpus: {s['provisions']:,} provisions, page-anchored
+  EVIDENCE       SOURCES         corpus: {s['provisions']:,} provisions, page-anchored
                  Dataset/ {s['pdfs']} primary-source PDFs ({s['dataset_mb']} MB)
 </pre>
 
 {_table(["Module", "Job", "Location", "Lines"], [
-    ("<b>SAMHITA</b>", "Structure-aware extraction from primary PDFs; "
-     "authority ranks; BM25 index", "<code>samhita/</code>", "1,209"),
-    ("<b>SUTRA</b>", "Law as code &mdash; versioned, date-effective, "
-     "declarative YAML, corpus-bound at load", "<code>sutra/</code>", "743"),
-    ("<b>PRAMANA</b>", "Citation verifier; an unverified sentence does not "
-     "ship", "<code>pramana/</code>", "243"),
-    ("<b>NIYAMA</b>", "Obligation checklist generator",
-     "in <code>sutra/engine.py</code>", "&mdash;"),
-    ("<b>SETU</b>", "Jurisdiction bridge, with explicit abstention",
-     "<code>setu/</code>", "123"),
-    ("<b>VARGIKARANA</b>", "Regulatory classification into the six PS "
-     "categories", "<code>vargikarana/</code>", "408"),
-    ("<b>SAMBANDHA</b>", "Relational knowledge graph and multi-hop walks",
-     "<code>sambandha/</code>", "631"),
-    ("<b>YUKTI</b>", "Agentic orchestration: plan, tools, trace",
-     "<code>yukti/</code>", "613"),
-    ("<b>SAMPARK</b>", "Escalation to a human facilitator; referral packet",
-     "<code>sampark/</code>", "584"),
+    ("<b>Sources</b>", "Structure-aware extraction from primary PDFs; "
+     "authority ranks; BM25 index", "<code>sources/</code>", "1,209"),
+    ("<b>Rules</b>", "Law as code &mdash; versioned, date-effective, "
+     "declarative YAML, corpus-bound at load", "<code>compliance/</code>", "743"),
+    ("<b>Citation gate</b>", "Citation verifier; an unverified sentence does not "
+     "ship", "<code>citations/</code>", "243"),
+    ("<b>Obligations</b>", "Obligation checklist generator",
+     "in <code>compliance/engine.py</code>", "&mdash;"),
+    ("<b>Jurisdictions</b>", "Jurisdiction bridge, with explicit abstention",
+     "<code>jurisdictions/</code>", "123"),
+    ("<b>Classification</b>", "Regulatory classification into the six "
+     "categories", "<code>classification/</code>", "408"),
+    ("<b>Knowledge graph</b>", "Relational knowledge graph and multi-hop walks",
+     "<code>graph/</code>", "631"),
+    ("<b>Planner</b>", "Agentic orchestration: plan, tools, trace",
+     "<code>planner/</code>", "613"),
+    ("<b>Escalation</b>", "Escalation to a human facilitator; referral packet",
+     "<code>escalation/</code>", "584"),
     ("<b>RESOLVER</b>", "Any script or language &rarr; canonical taxon",
      "<code>core/resolver.py</code>", "204"),
     ("<b>RAG layer</b>", "Hybrid retrieval, concept lexicon, grounded "
@@ -85,7 +89,7 @@ where it does not.</p>
  8  weak-retrieval check     nothing scoring high enough? -> ABSTAIN
  9  CITATIONS STREAM FIRST   ~0.1s, before a single word of prose
 10  draft                    the local model, shown ONLY the top 3 extracts
-11  PRAMANA gate             every sentence checked against those same 3
+11  citation gate             every sentence checked against those same 3
                              extracts; numbers, quotations and instrument
                              names take exact-match paths
 12  localise                 terminology lock: section numbers, Act names and
@@ -109,15 +113,15 @@ ones where no generation happens. Abstention costs 0.0 seconds.</p>
  2  RESOLVER         every ingredient -> canonical binomial, or an explicit
                      refusal to guess where synonymy is contested
  3  build facts      a typed FactTable; every fact records why it holds
- 4  VARGIKARANA      regulatory category from six tri-state facts, or the one
+ 4  Classification      regulatory category from six tri-state facts, or the one
                      question that would settle it
- 5  SUTRA            declarative rules evaluated against the facts; only
+ 5  Rules            declarative rules evaluated against the facts; only
                      VERIFIED rules may emit
- 6  PRAMANA          each finding's sentences checked against its own cited
+ 6  Citation gate          each finding's sentences checked against its own cited
                      span; a finding that fails is SUPPRESSED and the
                      suppression is printed
- 7  NIYAMA           obligations, each with who discharges it and when
- 8  SETU             jurisdiction matrix; a jurisdiction with no ingested
+ 7  Obligations           obligations, each with who discharges it and when
+ 8  Jurisdictions             jurisdiction matrix; a jurisdiction with no ingested
                      corpus prints ABSTAIN and names what it would need
  9  C-BOM            signed, digest-stable artifact
 </pre>
@@ -149,7 +153,7 @@ def ch_corpus(s: dict) -> str:
     ranks = ", ".join(f"rank {k}: {v:,}" for k, v in s["ranks"])
     return f"""
 <h1>6 &nbsp; The corpus: sourcing, extraction, and the problems solved</h1>
-<p class="kicker">SAMHITA &mdash; EVIDENCE THAT RESPECTS LEGAL STRUCTURE</p>
+<p class="kicker">SOURCES &mdash; EVIDENCE THAT RESPECTS LEGAL STRUCTURE</p>
 
 <p class="lead">{s['provisions']:,} provisions from {s['instruments']}
 instruments, extracted from {s['pdfs']} primary-source PDFs ({s['dataset_mb']}
@@ -294,7 +298,7 @@ vocabularies for the same concept.</p>
 
 <p>So <code>data/legal_concepts.yaml</code> maps lay phrasing (including
 Devanagari and Tamil) to statutory vocabulary, the provisions that govern it,
-and the SUTRA rules that decide it. {s['concepts']} concepts, curated as data
+and the compliance rules that decide it. {s['concepts']} concepts, curated as data
 reviewable by a domain expert who does not read Python.</p>
 
 <ul>
@@ -375,7 +379,7 @@ as a limitation rather than burying it.</p>
 def ch_trust(s: dict) -> str:
     return """
 <h1>8 &nbsp; The trust machinery</h1>
-<p class="kicker">PRAMANA &mdash; HOW HALLUCINATION IS MADE STRUCTURALLY HARD</p>
+<p class="kicker">THE CITATION GATE &mdash; HOW HALLUCINATION IS MADE STRUCTURALLY HARD</p>
 
 <p class="lead"><i>Pram&#257;&#7751;a</i> is a valid means of knowledge;
 <i>&#347;abda-pram&#257;&#7751;a</i> is textual authority. This module accepts a
@@ -389,7 +393,7 @@ explanations of decisions the rule engine has already made, and translate.
 rule firing on resolved facts.</p>
 
 <p>Stated precisely, because overclaiming here would be the same sin the module
-exists to prevent: PRAMANA is a <b>strict lexical entailment gate</b>. Numeric
+exists to prevent: the citation gate is a <b>strict lexical entailment gate</b>. Numeric
 and citation tokens take an exact-match path; prose takes a content-word
 coverage path against the cited span. It runs offline, deterministically, with
 no model weights &mdash; which is also what lets the whole compiler run
@@ -521,7 +525,7 @@ def ch_compiler(s: dict) -> str:
                  for rid, sev, lane, prov, ver in s["rule_rows"]]
     return f"""
 <h1>9 &nbsp; The compliance compiler</h1>
-<p class="kicker">SUTRA &middot; NIYAMA &middot; SETU &middot; C-BOM</p>
+<p class="kicker">RULES &middot; OBLIGATIONS &middot; JURISDICTIONS &middot; C-BOM</p>
 
 <p class="lead"><b>In:</b> a formulation &mdash; ingredients in any Indian
 language or script, process, dosage form, indications, marketing claims, target
@@ -598,14 +602,14 @@ that the blockers cleared; it re-derives them and shows which ones actually
 did. On the demonstration formulation, 4 blockers &rarr; 0, with the fixes
 named in order and a new C-BOM digest.</p>
 
-<h2>9.5 &nbsp; NIYAMA and SETU</h2>
+<h2>9.5 &nbsp; Obligations and the jurisdiction matrix</h2>
 
-<p>NIYAMA emits the obligations a set of findings triggers, each with the duty,
+<p>The obligations step emits the obligations a set of findings triggers, each with the duty,
 <b>who discharges it</b>, and <b>when</b> &mdash; because "Section 21 applies to
 you" is not actionable and "agree benefit-sharing terms as a condition of the
 NBA approval, before the application" is.</p>
 
-<p>SETU builds the jurisdiction matrix. Its most important behaviour is what it
+<p>The jurisdiction step builds the jurisdiction matrix. Its most important behaviour is what it
 does for a jurisdiction whose primary sources are not ingested: it prints
 <code>ABSTAIN &mdash; primary-source corpus for this jurisdiction not
 ingested</code> and names exactly what it would need. Inventing a US or EU
@@ -644,7 +648,7 @@ the corpus.</p>
 
 def ch_classification(s: dict) -> str:
     return f"""
-<h1>10 &nbsp; VARGIKARANA: classify before advising</h1>
+<h1>10 &nbsp; Classify before advising</h1>
 <p class="kicker">THE PART MOST IP ASSISTANTS SKIP</p>
 
 <p class="lead">This is not meant to be an IP chatbot. It is an
@@ -757,7 +761,7 @@ def ch_graph(s: dict) -> str:
     nodes = [(k, f"{v:,}") for k, v in st["by_node_kind"].items()]
     edges = [(k, f"{v:,}") for k, v in st["by_edge_kind"].items()]
     return f"""
-<h1>11 &nbsp; SAMBANDHA: the relational knowledge graph</h1>
+<h1>11 &nbsp; The relational knowledge graph</h1>
 <p class="kicker">MULTI-HOP REASONING RETRIEVAL STRUCTURALLY CANNOT DO</p>
 
 <p class="lead">The questions an AYUSH founder actually asks are multi-hop, and
@@ -797,7 +801,7 @@ implements India's CBD access-and-benefit-sharing obligations" is a legal
 proposition, not a string match, and an assistant that asserts it must be able
 to show why.</p>
 
-<p>So every authored link is held to the SUTRA gate: <b>both endpoints must
+<p>So every authored link is held to the rule-loader gate: <b>both endpoints must
 resolve to real extracted provisions, and every declared anchor must be
 verbatim in its endpoint.</b> A link that fails is dropped and reported.
 <code>python cli.py graph --stats</code> prints the failures. Currently:
@@ -859,14 +863,14 @@ corpus asserts no relationship between them, and I will not invent one."</i></p>
 
 def ch_orchestration(s: dict) -> str:
     return """
-<h1>12 &nbsp; YUKTI: agentic orchestration that is a plan</h1>
+<h1>12 &nbsp; Agentic orchestration that is a plan</h1>
 <p class="kicker">DELIBERATELY NOT AN AGENT THAT IMPROVISES</p>
 
 <div class="box">
 <p class="last"><b>The plan is deterministic. The tools are deterministic. The
 composition is deterministic.</b> A model appears in exactly one place &mdash;
 inside a retrieval step, phrasing an answer over spans it was handed, behind
-exactly the same PRAMANA gate it was already behind.</p>
+exactly the same citation gate it was already behind.</p>
 </div>
 
 <h2>12.1 &nbsp; Why this shape, and not the usual one</h2>
@@ -916,7 +920,7 @@ is stripped from the retrieval query for the ask step: three plant names
 dominate a query and drown the question the user actually asked.</p>
 
 <h3>3. Relationship questions</h3>
-<p>Routed to SAMBANDHA rather than to the retriever, because they are a walk.</p>
+<p>Routed to the knowledge graph rather than to the retriever, because they are a walk.</p>
 
 <h2>12.3 &nbsp; The safety properties, stated as properties</h2>
 
@@ -979,7 +983,7 @@ mechanisms compose without either knowing about the other.</p>
 
 def ch_escalation(s: dict) -> str:
     return f"""
-<h1>13 &nbsp; SAMPARK: escalation to a human IP facilitator</h1>
+<h1>13 &nbsp; Escalation to a human IP facilitator</h1>
 <p class="kicker">THE SYSTEM'S OWN LIMITS ARE THE BEST SIGNAL A PERSON IS NEEDED</p>
 
 <p class="lead">This is not a "contact us" button. The system already knows
@@ -1027,7 +1031,7 @@ the distinction was found.</p>
 
 <p>{s['routes']} institutional routes in <code>data/facilitators.yaml</code>,
 {s['routes_cited']} of them carrying the provision that establishes the office
-plus a verbatim anchor, verified at load exactly like a SUTRA rule. A route
+plus a verbatim anchor, verified at load exactly like a compliance rule. A route
 whose anchor has drifted from the primary source is dropped and reported.</p>
 
 {_table(["Route", "Established by"], [
@@ -1278,10 +1282,10 @@ def chapters_two(s: dict):
         ("7 · Retrieval", ch_retrieval(s)),
         ("8 · The trust machinery", ch_trust(s)),
         ("9 · The compliance compiler", ch_compiler(s)),
-        ("10 · VARGIKARANA: classify before advising", ch_classification(s)),
-        ("11 · SAMBANDHA: the knowledge graph", ch_graph(s)),
-        ("12 · YUKTI: agentic orchestration", ch_orchestration(s)),
-        ("13 · SAMPARK: escalation to a human", ch_escalation(s)),
+        ("10 · Classify before advising", ch_classification(s)),
+        ("11 · The knowledge graph", ch_graph(s)),
+        ("12 · Agentic orchestration", ch_orchestration(s)),
+        ("13 · Escalation to a human", ch_escalation(s)),
         ("14 · Multilingual delivery", ch_multilingual(s)),
         ("15 · Conversation memory and the score", ch_memory(s)),
     ]

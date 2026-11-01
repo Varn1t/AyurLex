@@ -1,4 +1,4 @@
-"""VARGIKARANA: the regulatory classification layer.
+"""Classification: the regulatory classification layer.
 
 Classification comes before advice, and it has to: the IP posture
 of an Ayurvedic product is decided by which regulatory category it falls into,

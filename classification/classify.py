@@ -8,7 +8,7 @@ would settle it rather than guessing -- the minimum clarifying questions, which 
 change the answer.
 
 Every category's provision ids are verified against the corpus at load time,
-exactly like a SUTRA rule or a RAG concept. A category pointing at a provision
+exactly like a compliance rule or a RAG concept. A category pointing at a provision
 that does not resolve fails loudly.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from pathlib import Path
 
 import yaml
 
-from samhita.index import Corpus, load_corpus
+from sources.index import Corpus, load_corpus
 
 ROOT = Path(__file__).resolve().parent.parent
 CLASSES = ROOT / "data" / "formulation_classes.yaml"

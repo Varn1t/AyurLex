@@ -1,6 +1,6 @@
-"""SAMBANDHA -- the relational knowledge graph over the corpus.
+"""Knowledge graph -- the relational knowledge graph over the corpus.
 
-*Sambandha* is relation. A relational knowledge graph is here to deepen
+A relational knowledge graph is here to deepen
 multi-step reasoning, and the reason it is needed is specific
 rather than fashionable: the questions an AYUSH founder actually asks are
 multi-hop, and retrieval is single-hop by construction.
@@ -19,7 +19,7 @@ Almost every edge is *derived*, not authored, and therefore cannot be wrong:
 
   PART_OF          a provision belongs to the instrument it was extracted from
   IN_JURISDICTION  an instrument belongs to the regime it was registered under
-  CITES            a SUTRA rule cites what its own YAML declares (already
+  CITES            a compliance rule cites what its own YAML declares (already
                    anchor-verified at rule load)
   GOVERNED_BY      a concept points at the provisions listed against it
   DEFINED_BY       a formulation category points at the provisions that define it
@@ -33,7 +33,7 @@ Almost every edge is *derived*, not authored, and therefore cannot be wrong:
 
 The only authored edges are the cross-instrument ones in
 `data/graph_links.yaml` -- treaty obligation to the domestic provision giving
-it effect -- and those are held to the SUTRA gate: both endpoints must resolve
+it effect -- and those are held to the rule-loader gate: both endpoints must resolve
 in the corpus and every declared anchor must be verbatim in its endpoint. A
 link that fails is dropped and reported, never silently kept.
 
@@ -60,7 +60,7 @@ from pathlib import Path
 
 import yaml
 
-from samhita.index import Corpus, load_corpus
+from sources.index import Corpus, load_corpus
 
 ROOT = Path(__file__).resolve().parent.parent
 LINKS = ROOT / "data" / "graph_links.yaml"
@@ -114,7 +114,7 @@ _KIND_RANK = {"instrument": 0, "concept": 1, "category": 2, "rule": 3,
 
 
 def _norm(s: str) -> str:
-    """Whitespace-insensitive comparison, exactly as the SUTRA loader does it:
+    """Whitespace-insensitive comparison, exactly as the rule loader does it:
     PDF extraction breaks lines mid-sentence, so an anchor matches on words."""
     return re.sub(r"\s+", " ", s).strip().lower()
 
@@ -471,7 +471,7 @@ def _add_corpus(g: Graph, corpus: Corpus) -> None:
 
 
 def _add_rules(g: Graph, corpus: Corpus) -> None:
-    from sutra.loader import load_rules
+    from compliance.loader import load_rules
 
     for rule in load_rules(corpus=corpus):
         rid = f"rule:{rule.id}"
@@ -533,7 +533,7 @@ def _add_concepts(g: Graph, corpus: Corpus) -> None:
 
 
 def _add_categories(g: Graph, corpus: Corpus) -> None:
-    from vargikarana.classify import load_classes
+    from classification.classify import load_classes
 
     for cat in load_classes().classes:
         if cat.problems:
@@ -595,7 +595,7 @@ def _add_outcomes(g: Graph, corpus: Corpus) -> None:
 
 
 def _add_links(g: Graph, corpus: Corpus) -> None:
-    """The authored edges, held to the SUTRA gate."""
+    """The authored edges, held to the rule-loader gate."""
     if not LINKS.exists():
         return
     raw = yaml.safe_load(LINKS.read_text(encoding="utf-8")) or []

@@ -1,4 +1,4 @@
-"""SAMHITA ingest: primary-source PDFs -> structured provision records.
+"""Sources ingest: primary-source PDFs -> structured provision records.
 
 Design rules (Section 6 of the build spec):
   * Split on structural boundaries only. We split at SECTION level and never
@@ -134,7 +134,7 @@ SOURCES: list[Source] = [
     # The food layer. An Ayurvedic preparation that makes no disease claim is
     # very often not a drug at all -- it is Ayurveda Aahara, or a health
     # supplement, and it is regulated by FSSAI rather than by the licensing
-    # authority under the Drugs and Cosmetics Act. vargikarana/ has always
+    # authority under the Drugs and Cosmetics Act. classification/ has always
     # been able to CLASSIFY a formulation into that category; until these
     # sources were ingested it could not CITE the instrument that governs it,
     # so the answer had to declare its own authority missing -- the category

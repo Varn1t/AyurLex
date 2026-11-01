@@ -22,7 +22,7 @@ CORPUS = ROOT / "corpus" / "provisions.jsonl"
 @pytest.fixture(scope="module")
 def records() -> list[dict]:
     if not CORPUS.exists():
-        pytest.skip("corpus not built; run python samhita/ingest.py")
+        pytest.skip("corpus not built; run python sources/ingest.py")
     return [json.loads(line) for line in CORPUS.open(encoding="utf-8")]
 
 

@@ -9,7 +9,7 @@ Two backends behind one interface:
     air-gapped profile, and it is what runs when no API key is present.
 
   * ClaudeAnswerer -- an LLM that may only paraphrase the supplied spans. Its
-    output is then passed through PRAMANA exactly like a compiler finding, so a
+    output is then passed through the citation gate exactly like a compiler finding, so a
     sentence it invents that no span supports is dropped before the user sees
     it. The model is a phrasing layer over retrieved text, never an authority.
 
@@ -27,7 +27,7 @@ from typing import Protocol
 from core.language import Language, detect
 from core.localise import t as localised
 from core.schema import Citation, CitationKind
-from pramana.verify import ENTAILED, content_words, entailment_score
+from citations.verify import ENTAILED, content_words, entailment_score
 from rag.retriever import RetrievalResult
 
 # Sentence boundaries. The Latin branch requires the next sentence to start
@@ -249,7 +249,7 @@ You are not giving legal advice; you are reporting what the cited provisions say
 
 
 class ClaudeAnswerer:
-    name = "claude (verified by PRAMANA)"
+    name = "claude (citation-verified)"
 
     def __init__(self, model: str = "claude-sonnet-5"):
         import anthropic
@@ -330,7 +330,7 @@ REDUNDANT = 0.85
 # restating itself reaches for a different inflection -- "the Authority
 # determines benefit sharing" then "benefit sharing is determined by the
 # Authority" -- and on exact tokens those two sentences overlap 0.80, just
-# under the bar. This is deliberately not applied to pramana.content_words:
+# under the bar. This is deliberately not applied to citations.content_words:
 # the citation gate is a check on whether a claim is supported, and making
 # that comparison fuzzier makes it weaker.
 _SUFFIX = ("ations", "ation", "ements", "ement", "ings", "ing", "ers",
@@ -419,7 +419,7 @@ class OllamaAnswerer:
         from rag.llm import Ollama
 
         self.client = Ollama(model)
-        self.name = f"ollama · {self.client.model} (verified by PRAMANA)"
+        self.name = f"ollama · {self.client.model} (citation-verified)"
 
     def write(self, question: str, res: RetrievalResult) -> str:
         lang = detect(question)
@@ -476,7 +476,7 @@ NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
 
 def verify_against_spans(text: str, res: RetrievalResult
                          ) -> tuple[str, float, list[str]]:
-    """PRAMANA applied to free text: every sentence must be carried by a
+    """The citation gate applied to free text: every sentence must be carried by a
     retrieved span, or by the fixed connective vocabulary of the answer itself."""
     spans = " ".join(h.record["text"] for h in res.hits[:PROMPT_HITS])
     meta = " ".join(f"{h.record['act_title']} Section {h.record['section']} "

@@ -1,6 +1,6 @@
 """Tests for the compiler core.
 
-The important one is test_rule_declared_test_cases: every SUTRA rule declares
+The important one is test_rule_declared_test_cases: every compliance rule declares
 fixtures it must and must not fire on, and this test runs all of them. A rule
 that ships without test cases is already refused at load time (it cannot reach
 VERIFIED), so this closes the loop -- CI fails if a rule's behaviour drifts.
@@ -27,8 +27,8 @@ from core.schema import (  # noqa: E402
     Jurisdiction,
     Severity,
 )
-from samhita.index import load_corpus  # noqa: E402
-from sutra.loader import load_rules  # noqa: E402
+from sources.index import load_corpus  # noqa: E402
+from compliance.loader import load_rules  # noqa: E402
 
 AS_OF = date(2026, 8, 31)
 
@@ -166,9 +166,9 @@ def test_fuzzy_match_is_proposed_not_accepted():
     assert "Withania somnifera" in res.candidates
 
 
-# -------------------------------------------------------------- pramana ----
-def test_pramana_strips_an_untraceable_number(corpus):
-    from pramana.verify import verify_finding
+# -------------------------------------------------------------- citations ----
+def test_citation_gate_strips_an_untraceable_number(corpus):
+    from citations.verify import verify_finding
 
     rec = corpus.get("IN.PATENTS.1970::S3")
     f = Finding(

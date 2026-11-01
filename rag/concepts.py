@@ -8,7 +8,7 @@ retrieval put the right provision in the top 5 for 2 questions out of 9.
 
 So the mapping is curated data (data/legal_concepts.yaml), reviewable by a
 domain expert who does not read Python, and verified against the corpus at load
-time exactly like a SUTRA rule: a concept pointing at a provision that does not
+time exactly like a compliance rule: a concept pointing at a provision that does not
 exist fails loudly instead of silently degrading retrieval.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from pathlib import Path
 
 import yaml
 
-from samhita.index import Corpus, load_corpus
+from sources.index import Corpus, load_corpus
 
 ROOT = Path(__file__).resolve().parent.parent
 CONCEPTS = ROOT / "data" / "legal_concepts.yaml"

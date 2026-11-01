@@ -1,6 +1,6 @@
 """FastAPI server for the AyurLex chat UI.
 
-Sessions are in-process and ephemeral by design (KAVACH): a formulation
+Sessions are in-process and ephemeral by design (the no-disk rule): a formulation
 described in chat is never written to disk here. Restarting the server
 forgets everything, which is the correct default for a product whose first
 industry objection is "why would I upload my proprietary formulation?".
@@ -71,7 +71,7 @@ def index() -> str:
 def health() -> dict:
     from rag.llm import ensure
     from rag.retriever import load_retriever
-    from sutra.loader import load_rules
+    from compliance.loader import load_rules
 
     from rag.bhashini import status as bhashini_status
 
@@ -178,7 +178,7 @@ def chat(req: Ask) -> JSONResponse:
         )
 
     if getattr(reply, "classification", None) is not None:
-        from vargikarana.classify import classification_payload
+        from classification.classify import classification_payload
 
         payload["classification"] = classification_payload(reply.classification)
 
@@ -248,7 +248,7 @@ def graph_stats() -> JSONResponse:
     whose anchor no longer matches the primary source is a defect, and a
     defect a reviewer cannot see is worse than one they can.
     """
-    from sambandha.graph import load_graph
+    from graph.graph import load_graph
 
     return JSONResponse(load_graph().stats())
 
@@ -257,7 +257,7 @@ def graph_stats() -> JSONResponse:
 def graph_path(src: str, dst: str, max_hops: int = 6) -> JSONResponse:
     """Walk between two nodes. Deterministic; no model in this path."""
     from rag.stream import walk_payload
-    from sambandha.graph import load_graph
+    from graph.graph import load_graph
 
     g = load_graph()
     a = g.resolve(src)
@@ -285,7 +285,7 @@ def graph_path(src: str, dst: str, max_hops: int = 6) -> JSONResponse:
 
 @app.get("/api/graph/neighbours")
 def graph_neighbours(node: str, hops: int = 1) -> JSONResponse:
-    from sambandha.graph import load_graph
+    from graph.graph import load_graph
 
     g = load_graph()
     found = g.resolve(node)
@@ -310,7 +310,7 @@ def facilitators() -> JSONResponse:
     Contact details are deployment configuration and ship unset; a prototype
     must not invent an office's phone number.
     """
-    from sampark.escalate import load_registry
+    from escalation.escalate import load_registry
 
     reg = load_registry()
     return JSONResponse({
@@ -337,7 +337,7 @@ def escalate(req: Escalate) -> JSONResponse:
     Nothing is sent anywhere. The packet is returned to the caller, who is the
     person whose formulation it describes.
     """
-    from sampark.escalate import assess, payload as referral_payload
+    from escalation.escalate import assess, payload as referral_payload
 
     session = SESSIONS.get(req.session_id or "")
     if session is None:
@@ -358,7 +358,7 @@ def escalate(req: Escalate) -> JSONResponse:
 @app.get("/api/provision/{corpus_id:path}")
 def provision(corpus_id: str) -> JSONResponse:
     """Click-to-source: the full provision behind any citation."""
-    from samhita.index import load_corpus
+    from sources.index import load_corpus
 
     c = load_corpus()
     if not c.has(corpus_id):

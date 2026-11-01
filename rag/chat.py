@@ -79,7 +79,7 @@ SPLIT_ITEMS = re.compile(r"\s*(?:,|;|\band\b|\+|/)\s*", re.I)
 STOP_ITEM = {"", "etc", "etc.", "and", "some", "a", "an", "the", "my", "our"}
 
 # Asking for a person. Kept here with the other intent patterns rather than
-# inside SAMPARK, because deciding WHICH route a message takes is the chat
+# inside the escalation module, because deciding WHICH route a message takes is the chat
 # layer's job and the escalation module's job is to assemble the packet once
 # that decision is made.
 ESCALATE_HINT = re.compile(
@@ -90,7 +90,7 @@ ESCALATE_HINT = re.compile(
     r"human (?:help|review|facilitator|expert)|"
     r"contact (?:a|an) (?:expert|agent|facilitator|attorney))\b", re.I)
 
-# Asking how two things connect -- a walk through SAMBANDHA, not a retrieval.
+# Asking how two things connect -- a walk through the knowledge graph, not a retrieval.
 GRAPH_HINT = re.compile(
     r"\b(how (?:does|do|is|are)\b[^?.]{0,70}\b(?:relate|related|connect|"
     r"connected|reach|linked|apply to)\b"
@@ -169,7 +169,7 @@ MAX_FOLLOWUP_SUBJECT = 3
 
 def subject_tokens(text: str) -> list[str]:
     """The words in a message that actually name what it is about."""
-    from samhita.index import tokenise
+    from sources.index import tokenise
 
     return [t for t in tokenise(text) if t not in _NO_SUBJECT]
 
@@ -333,13 +333,13 @@ def answer_to_pending(text: str) -> bool | None:
 def classification_for(session: Session, text: str = ""):
     """Classify using everything known: the session's gathered facts, the
     formulation on the session, and whatever this sentence settles."""
-    from vargikarana.classify import facts_from_formulation, load_classes
+    from classification.classify import facts_from_formulation, load_classes
 
     facts = dict(session.class_facts)
     read = (facts_from_formulation(session.formulation, text)
             if session.formulation is not None else None)
     if read is None:
-        from vargikarana.classify import facts_from_text
+        from classification.classify import facts_from_text
 
         read = facts_from_text(text)
     # Facts the user has stated explicitly win over facts inferred from prose.
@@ -355,7 +355,7 @@ def classification_for(session: Session, text: str = ""):
 
 
 def _fact_for_question(result) -> str | None:
-    from vargikarana.classify import QUESTIONS
+    from classification.classify import QUESTIONS
 
     if result.decided or not result.ask:
         return None
@@ -525,7 +525,7 @@ def escalate_reply(session: Session, text: str = "") -> ChatReply:
     already have to cite. Nothing is transmitted -- the packet is rendered for
     the user to copy.
     """
-    from sampark.escalate import assess, render
+    from escalation.escalate import assess, render
 
     last = session.last_answer
     ref = assess(
@@ -562,8 +562,8 @@ def is_graph_question(text: str) -> bool:
     if not GRAPH_HINT.search(text):
         return False
 
-    from sambandha.graph import load_graph
-    from yukti.orchestrate import _graph_endpoints
+    from graph.graph import load_graph
+    from planner.orchestrate import _graph_endpoints
 
     return len(_graph_endpoints(text, load_graph())) >= 2
 
@@ -575,8 +575,8 @@ def graph_reply(session: Session, text: str) -> ChatReply:
     system can already prove, and the rendering is fixed connective text over
     edge notes and provision headings.
     """
-    from sambandha.graph import load_graph
-    from yukti.orchestrate import _graph_endpoints
+    from graph.graph import load_graph
+    from planner.orchestrate import _graph_endpoints
 
     g = load_graph()
     ends = _graph_endpoints(text, g)
@@ -604,7 +604,7 @@ def graph_reply(session: Session, text: str) -> ChatReply:
 def orchestrate_reply(session: Session, text: str, *,
                       backend: AnswerBackend | None = None) -> ChatReply:
     """Multi-part question: plan it, run the steps, present them separately."""
-    from yukti.orchestrate import run as run_plan
+    from planner.orchestrate import run as run_plan
 
     o = run_plan(text, as_of=session.as_of, backend=backend, session=session)
     for r in o.trace.results:
@@ -678,7 +678,7 @@ def respond(text: str, session: Session, *,
     # simpler path it already had. Orchestration is for questions that a
     # single retrieval cannot serve, not a new default.
     if intent == "ASK":
-        from yukti.orchestrate import plan as build_plan
+        from planner.orchestrate import plan as build_plan
 
         steps = build_plan(text, session=session)
         if len([s for s in steps if s.tool in ("ask", "graph")]) >= 2:

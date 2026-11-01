@@ -15,7 +15,7 @@ so a stale figure is impossible by construction and a checked-in copy would
 only be a snapshot that disagrees with the code. Build it:
 
 ```bash
-python samhita/ingest.py                        # the corpus everything reads
+python sources/ingest.py                        # the corpus everything reads
 
 python scripts/build_documentation_pdf.py       # the full technical record
 python scripts/build_architecture_diagrams.py   # three 16:9 diagrams
@@ -107,9 +107,9 @@ Four guarantees, each enforced in code rather than by convention:
 | Guarantee                                               | Where it is enforced                                   |
 | ------------------------------------------------------- | ------------------------------------------------------ |
 | A finding without a citation cannot be serialised       | `core/schema.py` — pydantic validator               |
-| A rule cannot cite a provision that was never extracted | `sutra/loader.py` — corpus binding at load          |
-| A rule's anchor must be verbatim in the source PDF      | `sutra/loader.py` + `scripts/verify_provisions.py` |
-| A number with no traceable source is stripped           | `pramana/verify.py` — exact-match numeric path      |
+| A rule cannot cite a provision that was never extracted | `compliance/loader.py` — corpus binding at load          |
+| A rule's anchor must be verbatim in the source PDF      | `compliance/loader.py` + `scripts/verify_provisions.py` |
+| A number with no traceable source is stripped           | `citations/verify.py` — exact-match numeric path      |
 
 An unverified rule can match the facts and still emit nothing. That abstention
 is printed in the report rather than hidden.
@@ -118,12 +118,11 @@ is printed in the report rather than hidden.
 
 ```bash
 pip install -e .                # installs the `ayurlex` command (editable: it reads data/ in place)
-ollama pull qwen3.5:4b
-ollama create qwen3.5-small -f MODELFILE   # optional: same model, 2k context, faster
+ollama pull qwen2.5:1.5b        # or llama3.1 if you have a GPU
 
-python samhita/ingest.py        # PDFs   -> corpus/provisions.jsonl  (3,491 provisions)
-python samhita/priorart.py      # TKDL   -> corpus/tkdl_outcomes.jsonl (85 outcomes)
-python samhita/schedules.py     # DMR    -> corpus/dmr_schedule.json  (54 conditions)
+python sources/ingest.py        # PDFs   -> corpus/provisions.jsonl  (3,491 provisions)
+python sources/priorart.py      # TKDL   -> corpus/tkdl_outcomes.jsonl (85 outcomes)
+python sources/schedules.py     # DMR    -> corpus/dmr_schedule.json  (54 conditions)
 
 ayurlex serve                                # web chat UI at http://127.0.0.1:8000
 ayurlex chat                                 # same thing in the terminal
@@ -150,14 +149,16 @@ formulation into someone else's API. With Ollama, they don't.
 Measured on this machine (CPU-bound, no usable GPU), answering one legal
 question from a retrieved extract:
 
-| Model            | Time          | Notes                                       |
-| ---------------- | ------------- | ------------------------------------------- |
-| `qwen2.5:1.5b` | **14s** | best Indic coverage at this size |
-| `llama3.2:3b`  | 42s           |                                             |
-| `llama3.1:8b`  | 79s           | best phrasing; use it if you have a GPU     |
+| Model            | Time          | Notes                                   |
+| ---------------- | ------------- | --------------------------------------- |
+| `qwen2.5:1.5b` | **14s** | default — best Indic coverage at this size |
+| `llama3.2:3b`  | 42s           |                                         |
+| `llama3.1:8b`  | 79s           | best phrasing; use it if you have a GPU |
 
-The default is the first installed model in `PREFERRED` (`rag/llm.py`):
-`qwen3.5-small`, then `qwen3.5:4b`, then the models above.
+`qwen3.5:4b` is supported but not the default: on eight in-corpus questions
+it got 2/8 answers past the citation gate against 8/8 for `qwen2.5:1.5b`. It
+paraphrases further from the statute, so the gate withholds its drafts. The
+default is the first installed model in `PREFERRED` (`rag/llm.py`).
 
 A 79-second pause is a broken experience regardless of how well the sentence
 reads, and the model here is only a phrasing layer over text the
@@ -244,19 +245,19 @@ surfaces without being asked.
 
 | Module                | Job                                                                                                                               | Where                  |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| **SAMHITA**     | Prior-art and statute index: structure-aware extraction, authority ranks, BM25                                                    | `samhita/`           |
-| **SUTRA**       | Law as code — versioned, date-effective, declarative YAML                                                                        | `sutra/`             |
-| **PRAMANA**     | Citation verifier; an unverified sentence does not ship                                                                           | `pramana/`           |
-| **NIYAMA**      | Obligation checklist generator                                                                                                    | in `sutra/engine.py` |
-| **SETU**        | Jurisdiction bridge, with explicit abstention                                                                                     | `setu/`              |
-| **VARGIKARANA** | Regulatory classification — which of the six categories a formulation falls into, and the very different IP posture each carries | `vargikarana/`       |
-| **SAMBANDHA**   | Relational knowledge graph — 3,392 nodes over provisions, rules, concepts, taxa and treaties; multi-hop walks                    | `sambandha/`         |
-| **YUKTI**       | Agentic orchestration — deterministic plan, typed tools, auditable trace                                                         | `yukti/`             |
-| **SAMPARK**     | Escalation to a human IP facilitator, with a referral packet                                                                      | `sampark/`           |
-| **RESOLVER**    | Any script or language → canonical taxon                                                                                         | `core/resolver.py`   |
+| **Sources**     | Prior-art and statute index: structure-aware extraction, authority ranks, BM25                                                    | `sources/`           |
+| **Rules**       | Law as code — versioned, date-effective, declarative YAML                                                                        | `compliance/`             |
+| **Citation gate**     | Citation verifier; an unverified sentence does not ship                                                                           | `citations/`           |
+| **Obligations**      | Obligation checklist generator                                                                                                    | in `compliance/engine.py` |
+| **Jurisdictions**        | Jurisdiction bridge, with explicit abstention                                                                                     | `jurisdictions/`              |
+| **Classification** | Regulatory classification — which of the six categories a formulation falls into, and the very different IP posture each carries | `classification/`       |
+| **Knowledge graph**   | Relational knowledge graph — 3,392 nodes over provisions, rules, concepts, taxa and treaties; multi-hop walks                    | `graph/`         |
+| **Planner**       | Agentic orchestration — deterministic plan, typed tools, auditable trace                                                         | `planner/`             |
+| **Escalation**     | Escalation to a human IP facilitator, with a referral packet                                                                      | `escalation/`           |
+| **Resolver**    | Any script or language → canonical taxon                                                                                         | `core/resolver.py`   |
 | **RAG layer**   | Hybrid retrieval, concept lexicon, grounded answers, chat                                                                         | `rag/`               |
 
-### VARGIKARANA — classify before advising
+### Classify before advising
 
 Classification comes before advice, and it has to: the IP posture
 of an Ayurvedic product is decided by which regulatory category it falls into,
@@ -270,7 +271,7 @@ corpus by the same gate as the rules, and a fact that is still open is *asked
 about* rather than assumed — one question at a time, and only questions whose
 answer would change the category. No model is involved.
 
-### SAMBANDHA — the knowledge graph, and why it adds no new way to be wrong
+### The knowledge graph, and why it adds no new way to be wrong
 
 The questions an AYUSH founder actually asks are multi-hop, and retrieval is
 single-hop by construction. *"India is a Party to the Nagoya Protocol — so what
@@ -290,7 +291,7 @@ The only authored edges are the thirteen cross-instrument ones in
 `data/graph_links.yaml` — treaty obligation to the domestic provision that
 gives it effect, a section and the later section that rewrote it, and the line
 where the food regime hands over to the drug regime — and they are held to the
-SUTRA gate: **both endpoints must
+rule-loader gate: **both endpoints must
 resolve in the corpus and every declared anchor must be verbatim in its
 endpoint.** A link that fails is dropped and reported. `cli.py graph --stats`
 prints the failures rather than hiding them.
@@ -308,11 +309,11 @@ Two design decisions are worth stating because both were wrong first:
 
 A walk that crosses the India/international boundary says so, every time.
 
-### YUKTI — agentic orchestration that is a plan, not an improviser
+### Agentic orchestration that is a plan, not an improviser
 
 The plan is deterministic. The tools are deterministic. The composition is
 deterministic. A model appears in exactly one place — inside a retrieval step,
-phrasing an answer over spans it was handed, behind the same PRAMANA gate it
+phrasing an answer over spans it was handed, behind the same citation gate it
 was already behind.
 
 That is an unusual shape for an "agent" and it is the point. The ordinary
@@ -349,7 +350,7 @@ planner chose it, elapsed time, layer, groundedness, and what it cited. The UI
 ships the trace in a collapsible block, because an agent whose steps cannot be
 inspected is one you have to take on trust.
 
-### SAMPARK — escalation to a human, with a brief they can act on
+### Escalation to a human, with a brief they can act on
 
 The system's own limits are the best signal that a person is needed. It already
 knows when it abstained, when a blocker has no available fix, when a taxon was
@@ -359,7 +360,7 @@ corpus. Those are the moments to hand over, and they are facts, not judgements
 
 `data/facilitators.yaml` holds 12 institutional routes, each carrying the
 provision that establishes the office and a verbatim anchor, verified at load
-exactly like a SUTRA rule: patent agent (Patents Act s.126), NBA (BDA s.8),
+exactly like a compliance rule: patent agent (Patents Act s.126), NBA (BDA s.8),
 State Biodiversity Board (s.22), ASU licensing authority (D&C Rules r.154), GI
 Registry (GI Act s.5), Trade Marks Registry (TM Act s.3), PPV&FR Authority,
 Copyright Office, Designs Office, TKDL access cell, FSSAI (FSS Act s.4) — plus
@@ -490,7 +491,7 @@ tuning — it was register. "Can I patent my family formulation?" and "What are 
 inventions" share no content words at all, and no embedding fixes that reliably.
 
 So `data/legal_concepts.yaml` maps lay phrasing (including Hindi) to statutory
-vocabulary, the provisions that govern it, and the SUTRA rules that decide it.
+vocabulary, the provisions that govern it, and the compliance rules that decide it.
 Matching is ordered-subsequence within a proximity window — "file abroad" must
 match "file a patent abroad", but not "file" … forty words … "abroad". Concept
 ids are corpus-verified at load exactly like rules: a concept pointing at a
@@ -513,7 +514,7 @@ same measurement on *held-out* questions, which is the next job (see below).
 ### Answer generation, and why adding an LLM adds no new way to be wrong
 
 - **Ollama (default).** A local model that may only paraphrase the supplied
-  extracts. Its output goes through PRAMANA exactly like a compiler finding.
+  extracts. Its output goes through the citation gate exactly like a compiler finding.
 - **Extractive (fallback).** Selects and quotes the operative clause. It cannot
   hallucinate because it never writes a sentence — everything it emits is a
   verbatim span or fixed connective text.
@@ -581,7 +582,7 @@ built to be visible and optional:
   deciding whether to describe a proprietary formulation is entitled to know
   before they type. `ayurlex bhashini` prints it, and `--probe` confirms
   the pipeline actually resolves.
-- **Nothing is written to disk, in or out.** The KAVACH rule is untouched.
+- **Nothing is written to disk, in or out.** The no-disk rule is untouched.
 - **No guard is relaxed for it.** Being the national infrastructure makes
   Bhashini a better translator, not a trusted one.
 - **It fails soft.** An unreachable service falls back to the local model, and
@@ -611,13 +612,13 @@ run afterwards to catch a mask the service loses.
 Checked before retrieval, in `rag/retriever.py`, and pinned by
 `tests/test_guardrails.py`. Each refusal names its reason:
 
-| Asked | Response |
-|---|---|
-| Another country's law ("trademark in Japan") | refuses, unless it names India or is about filing abroad from India |
-| Off-topic ("capital of France") | refuses when no word of the question appears in the corpus |
-| Clinical ("dose of brahmi for my child") | refuses and points to a registered practitioner |
-| Evading the law ("without getting caught") | refuses; offers what compliance requires |
-| Prompt injection ("ignore your instructions") | refuses before any model sees it |
+| Asked                                         | Response                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------- |
+| Another country's law ("trademark in Japan")  | refuses, unless it names India or is about filing abroad from India |
+| Off-topic ("capital of France")               | refuses when no word of the question appears in the corpus          |
+| Clinical ("dose of brahmi for my child")      | refuses and points to a registered practitioner                     |
+| Evading the law ("without getting caught")    | refuses; offers what compliance requires                            |
+| Prompt injection ("ignore your instructions") | refuses before any model sees it                                    |
 
 ### Where it deliberately does not refuse
 
@@ -628,7 +629,7 @@ to that background material, inverts the authority weighting (a request for
 description wants the descriptive corpus, not "What are *not* inventions"), and
 the answer is **labelled as background, not law**.
 
-### SAMHITA — extraction that respects legal structure
+### Extraction that respects legal structure
 
 Chunks split at **section** level and never below, so a proviso or an
 *Explanation* can never be orphaned from its parent — a chunk holding only the
@@ -638,7 +639,7 @@ ignoring it, which is why a practising vaidya is not told to file an intimation
 the statute exempts them from.
 
 Three extraction problems in the shipped PDFs, each solved deterministically and
-documented in `samhita/ingest.py`:
+documented in `sources/ingest.py`:
 
 - **Footnotes read as sections.** India Code sets footnotes at 9pt at the foot
   of the page, renumbered per page. A linear extraction reads *"3. Cl. (a)
@@ -681,12 +682,12 @@ Result: 157 of 163 Patents Act sections; 101 of 101 FSS Act sections;
 
 `About TKDL.pdf` ships the official annexure of patent applications **actually
 revoked, refused or withdrawn** after TKDL prior art was cited against them.
-`samhita/priorart.py` extracts 85 of those records with application numbers and
+`sources/priorart.py` extracts 85 of those records with application numbers and
 page provenance. When a formulation resembles one, the compiler cites an
 application a patent office already killed on that ground — checkable evidence,
 not an asserted verse citation.
 
-### RESOLVER — multilingual that does work, not decoration
+### The resolver — multilingual that does work, not decoration
 
 A vaidya types **गुडूची** or **Amrutha** or **Giloy** or **Guduchi** or
 **gulvel**; all five land on *Tinospora cordifolia* before any legal reasoning
@@ -722,7 +723,7 @@ annexures, not claims), legal advice, and outcome prediction.
 ## Status
 
 ```
-14/14 SUTRA rules VERIFIED against primary sources
+14/14 compliance rules VERIFIED against primary sources
 13 citations re-verified directly from the source PDFs — no drift
 252/252 tests passing · 17/17 scope guardrails (foreign law, off-topic, clinical, evasion, injection)
 10/10 identical C-BOM digests
@@ -749,12 +750,12 @@ Bhashini translation available, off unless configured
 2. **Rule breadth** — trade marks, GI, PPV&FR and the Drugs and Cosmetics ASU
    licensing route. The corpus for all four is already ingested; each needs the
    §PROVISION_VERIFICATION pass.
-3. **PRAMANA upgrade** — swap the lexical coverage path in `entailment_score`
+3. **Citation-gate upgrade** — swap the lexical coverage path in `entailment_score`
    for a cross-encoder NLI model and tune the thresholds on a labelled set.
 4. **Grow the curated graph links.** Thirteen are anchor-verified; Madrid,
    Hague, Budapest and the EU THMPD route are the next four, and each needs its
    corpus ingested first.
-5. **KAVACH** — sealed mode and the on-prem compose file.
+5. **Sealed mode** and the on-prem compose file.
 
 ## License
 

@@ -27,10 +27,10 @@ dev = ["pytest>=8.0"]
 ayurlex = "cli:main"
 
 # Install EDITABLE (pip install -e .): the code reads data/, web/, corpus/ and
-# sutra/rules/ relative to the source tree, so a copied install would lose them.
+# compliance/rules/ relative to the source tree, so a copied install would lose them.
 [tool.setuptools]
 py-modules = ["cli", "server"]
 
 [tool.setuptools.packages.find]
-include = ["cbom*", "core*", "pramana*", "rag*", "sambandha*", "samhita*",
-           "sampark*", "setu*", "sutra*", "vargikarana*", "yukti*", "tests*"]
+include = ["cbom*", "core*", "citations*", "rag*", "graph*", "sources*",
+           "escalation*", "jurisdictions*", "compliance*", "classification*", "planner*", "tests*"]

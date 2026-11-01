@@ -1,6 +1,6 @@
 """Fact extraction: Formulation -> a flat, typed fact table.
 
-Everything a SUTRA rule can test lives here, and every value is computed
+Everything a compliance rule can test lives here, and every value is computed
 deterministically from the formulation, the resolver and the ingested corpus.
 No LLM touches this stage. If a fact cannot be established, it is None and the
 rules that depend on it abstain -- which is a shipped feature, not a gap.

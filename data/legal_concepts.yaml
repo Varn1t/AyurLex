@@ -10,7 +10,7 @@
 #   lay        -- how people actually ask, including Hindi/Devanagari forms
 #   statutory  -- the terms the drafter used, appended to the query
 #   provisions -- the corpus ids this concept is governed by
-#   rules      -- the SUTRA rules that decide it, so chat can offer a compile
+#   rules      -- the compliance rules that decide it, so chat can offer a compile
 #
 # A provision id may carry a pin-cite: 'IN.PATENTS.1970::S3(p)' means the
 # concept is governed by clause (p) specifically, so the answer quotes that

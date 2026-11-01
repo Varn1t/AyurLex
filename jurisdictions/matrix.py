@@ -1,8 +1,8 @@
-"""SETU -- the jurisdiction bridge.
+"""Jurisdictions -- the jurisdiction bridge.
 
 An honest note about scope, because this is the module where it would be
 easiest to cheat: the shipped corpus contains Indian primary sources only. So
-SETU answers the four questions from the primary sources it actually has for
+It answers the four questions from the primary sources it actually has for
 IN, and for every other jurisdiction it ABSTAINS explicitly, naming the corpus
 it would need.
 
@@ -15,7 +15,7 @@ is missing survives that check.
 The cross-lane insight still lands in full, because it is an Indian-law
 observation: the documented traditional use that Section 3(p) treats as
 disqualifying is the same evidence base that traditional-use registration
-routes consume. SETU labels that OPPORTUNITY on the IN row and marks the
+routes consume. It labels that OPPORTUNITY on the IN row and marks the
 destination-market rows as pending their own corpus.
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ from core.schema import (
     JurisdictionRow,
     Severity,
 )
-from sutra.facts import FactTable
+from compliance.facts import FactTable
 
 ABSTAIN = "ABSTAIN — primary-source corpus for this jurisdiction not ingested"
 

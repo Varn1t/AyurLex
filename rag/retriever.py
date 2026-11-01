@@ -1,4 +1,4 @@
-"""Hybrid retrieval over the SAMHITA corpus.
+"""Hybrid retrieval over the source corpus.
 
 Three retrievers fused, then reranked:
 
@@ -41,7 +41,7 @@ import numpy as np
 
 from core.resolver import load_resolver
 from rag.concepts import load_concepts
-from samhita.index import Corpus, in_force, load_corpus, tokenise
+from sources.index import Corpus, in_force, load_corpus, tokenise
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "corpus" / "lsa_index.npz"
@@ -162,7 +162,7 @@ class RetrievalResult:
 
     @property
     def rules(self) -> list[str]:
-        """SUTRA rules that decide the matched concepts. This is what lets chat
+        """compliance rules that decide the matched concepts. This is what lets chat
         offer 'compile your formulation' instead of only quoting law at you."""
         out: list[str] = []
         for m in self.concepts:
@@ -428,7 +428,7 @@ class HybridRetriever:
         not drag the answer across the boundary.
         """
         if concepts:
-            from samhita.index import load_corpus
+            from sources.index import load_corpus
 
             corpus = load_corpus()
             for m in concepts:

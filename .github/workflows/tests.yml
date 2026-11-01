@@ -15,7 +15,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       # The corpus is generated from the tracked PDFs in Dataset/, not committed.
-      - run: python samhita/ingest.py
-      - run: python samhita/priorart.py
-      - run: python samhita/schedules.py
+      - run: python sources/ingest.py
+      - run: python sources/priorart.py
+      - run: python sources/schedules.py
       - run: python -m pytest -q

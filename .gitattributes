@@ -4,7 +4,7 @@
 * text=auto
 
 # Primary sources are binary and must never be touched by EOL conversion —
-# a single byte of "normalisation" in a PDF corrupts it, and PRAMANA verifies
+# a single byte of "normalisation" in a PDF corrupts it, and the citation gate verifies
 # citations by re-extracting from these files.
 *.pdf binary
 

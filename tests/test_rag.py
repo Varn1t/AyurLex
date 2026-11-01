@@ -79,7 +79,7 @@ def test_vernacular_query_reaches_the_statute(retriever):
 
 def test_repealed_or_future_law_is_filtered_before_scoring(retriever):
     """as_of is a pre-filter. Any hit returned must be in force on that date."""
-    from samhita.index import in_force
+    from sources.index import in_force
 
     res = retriever.search("what are not inventions", k=8, as_of=date(2005, 1, 1))
     assert all(in_force(h.record, date(2005, 1, 1)) for h in res.hits)
@@ -119,7 +119,7 @@ def test_extractive_answer_is_verbatim_from_the_corpus(retriever):
     character. This is what makes the offline backend unable to hallucinate."""
     import re
 
-    from samhita.index import load_corpus
+    from sources.index import load_corpus
 
     corpus = load_corpus()
     res = retriever.search("can I advertise that my product cures diabetes")
@@ -194,9 +194,13 @@ def test_autofix_without_a_formulation_asks_rather_than_guesses():
 
 
 def test_follow_up_is_resolved_against_the_previous_turn():
+    # Extractive backend: this tests follow-up resolution, not how well the
+    # installed model happens to phrase an answer past the citation gate.
+    from rag.answer import ExtractiveAnswerer
     s = Session(as_of=AS_OF)
-    respond("can I advertise that my product cures diabetes", s)
-    reply = respond("why?", s)
+    respond("can I advertise that my product cures diabetes", s,
+            backend=ExtractiveAnswerer())
+    reply = respond("why?", s, backend=ExtractiveAnswerer())
     # The bare "why?" retrieves nothing on its own; carried context keeps it
     # on the advertising provisions.
     assert reply.intent == "FOLLOW"

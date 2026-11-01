@@ -242,7 +242,7 @@ if __name__ == "__main__":
 
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8",
                                   errors="replace")
-    print("SAMHITA retrieval gold set\n")
+    print("Retrieval gold set\n")
     evaluate()
     print("\nHeld-out set (not tuned against)\n")
     evaluate(cases=HELD_OUT)

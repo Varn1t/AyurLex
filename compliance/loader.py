@@ -1,4 +1,4 @@
-"""SUTRA loader: YAML rules -> validated, corpus-bound Rule objects.
+"""rule loader: YAML rules -> validated, corpus-bound Rule objects.
 
 The load step is a gate, not a parse. A rule is admitted only if:
   * every citation it declares resolves to a real provision in the ingested
@@ -21,10 +21,10 @@ from typing import Any
 import yaml
 
 from core.schema import CitationKind, Severity, VerificationStatus
-from samhita.index import Corpus, load_corpus
+from sources.index import Corpus, load_corpus
 
 ROOT = Path(__file__).resolve().parent.parent
-RULES_DIR = ROOT / "sutra" / "rules"
+RULES_DIR = ROOT / "compliance" / "rules"
 
 
 def _norm(s: str) -> str:
@@ -152,7 +152,7 @@ def verify_rule(rule: Rule, corpus: Corpus) -> Rule:
     for c in rule.citations:
         if c.from_fact:
             # Resolved at emit time from a fact (e.g. a prior-art hit). Its
-            # authority is the fact's own provenance, checked by PRAMANA.
+            # authority is the fact's own provenance, checked by the citation gate.
             c.verified = True
             continue
         if not corpus.has(c.corpus_id):

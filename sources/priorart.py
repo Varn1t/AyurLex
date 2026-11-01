@@ -1,4 +1,4 @@
-"""SAMHITA prior-art layer, built from the TKDL annexures in the dataset.
+"""Prior-art layer, built from the TKDL annexures in the dataset.
 
 "About TKDL.pdf" ships the official annexure listing patent applications that
 were actually revoked, refused, withdrawn or amended after TKDL prior art was

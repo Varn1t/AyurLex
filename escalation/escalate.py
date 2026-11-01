@@ -1,6 +1,6 @@
-"""SAMPARK -- escalation to a human IP facilitator.
+"""Escalation -- escalation to a human IP facilitator.
 
-*Sampark* is contact: a path to escalate to a human IP facilitator. The
+A path to escalate to a human IP facilitator. The
 reason it belongs in a
 citation-grounded assistant rather than beside it is the honest one: the
 system's own limits are the best signal that a human is needed. It already
@@ -17,7 +17,7 @@ So escalation here is not a "contact us" button. It is:
 
   2. A ROUTING TABLE with a statutory basis. `data/facilitators.yaml` names
      institutional routes, each carrying the provision that establishes the
-     office and a verbatim anchor, verified at load exactly like a SUTRA rule.
+     office and a verbatim anchor, verified at load exactly like a compliance rule.
      A route whose anchor has drifted from the primary source is dropped and
      reported. Routes with no statute behind them -- the FSSAI Ayurveda Aahara
      regulations are not in the corpus, and a ministry facilitation desk is
@@ -56,7 +56,7 @@ from pathlib import Path
 
 import yaml
 
-from samhita.index import Corpus, load_corpus
+from sources.index import Corpus, load_corpus
 
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "data" / "facilitators.yaml"

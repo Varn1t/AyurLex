@@ -309,7 +309,7 @@ department's decision rather than a developer's.</li>
 </ul>
 
 <h3>Stage 5 &mdash; Depth</h3>
-<p>A cross-encoder NLI model to replace the lexical coverage path in PRAMANA,
+<p>A cross-encoder NLI model to replace the lexical coverage path in the citation gate,
 tuned on a labelled set; a transformer retriever where an air-gapped install is
 not required; provision-level commencement data to make the temporal filter a
 real guarantee rather than scaffolding.</p>
@@ -549,7 +549,7 @@ and was not.</li>
 <li><b>The escalation directory ships without contact details.</b> The routes
 and statutory bases are verified; the desks behind them are deployment
 configuration.</li>
-<li><b>PRAMANA is a lexical gate, not a neural NLI model.</b> It is strict and
+<li><b>The citation gate is a lexical gate, not a neural NLI model.</b> It is strict and
 deterministic, and it will drop a correct paraphrase that shares few content
 words with its source. The upgrade path is a cross-encoder at one function.</li>
 </ul>
@@ -792,7 +792,7 @@ given &mdash; because candour beats hedging.</p>
 {q("Walk us through the architecture.",
    "Four layers. <b>Evidence</b>: 28 primary-source PDFs extracted into "
    "page-anchored provisions with authority ranks. <b>Verification</b>: the "
-   "schema validator, the rule loader's corpus binding, and PRAMANA's citation "
+   "schema validator, the rule loader's corpus binding, and the citation gate's citation "
    "gate. <b>Reasoning</b>: the rule engine, the classifier, the retriever, "
    "the knowledge graph, the jurisdiction matrix, the escalation router. "
    "<b>Interface</b>: chat, CLI and HTTP.",
@@ -1017,7 +1017,7 @@ given &mdash; because candour beats hedging.</p>
    "regulations, because those two gaps cost real answers today. Then rules "
    "for trade marks, GI and plant varieties, since the corpus is already "
    "ingested. Then a cross-encoder NLI gate to replace the lexical coverage "
-   "path in PRAMANA, tuned on a labelled set. Notably, none of that is "
+   "path in the citation gate, tuned on a labelled set. Notably, none of that is "
    "re-architecture.")}
 
 {q("Someone asks a question you know answers badly. What do you say?",
@@ -1192,14 +1192,14 @@ data/                 curated, reviewable by a domain expert
   graph_links.yaml          {s['links']} anchor-verified treaty->domestic links
   facilitators.yaml         {s['routes']} escalation routes
 
-samhita/     extraction, BM25, prior art, schedules
-sutra/       the rule engine + rules/*.yaml ({s['rules']} rules)
-pramana/     the citation gate
-vargikarana/ regulatory classification
-sambandha/   the knowledge graph
-yukti/       the orchestrator
-sampark/     escalation to a human
-setu/        the jurisdiction matrix
+sources/     extraction, BM25, prior art, schedules
+compliance/       the rule engine + rules/*.yaml ({s['rules']} rules)
+citations/     the citation gate
+classification/ regulatory classification
+graph/   the knowledge graph
+planner/       the orchestrator
+escalation/     escalation to a human
+jurisdictions/        the jurisdiction matrix
 cbom/        the click-to-source HTML report
 core/        schema, compiler, resolver, language, localisation
 rag/         retrieval, concepts, answers, chat, streaming, translation
@@ -1215,9 +1215,9 @@ scripts/     verification, and this document's build script
 # build
 pip install -r requirements.txt
 ollama pull qwen2.5:1.5b          # or llama3.1 if you have a GPU
-python samhita/ingest.py          # PDFs  -> corpus/provisions.jsonl
-python samhita/priorart.py        # TKDL  -> corpus/tkdl_outcomes.jsonl
-python samhita/schedules.py       # DMR   -> corpus/dmr_schedule.json
+python sources/ingest.py          # PDFs  -> corpus/provisions.jsonl
+python sources/priorart.py        # TKDL  -> corpus/tkdl_outcomes.jsonl
+python sources/schedules.py       # DMR   -> corpus/dmr_schedule.json
 
 # run
 python cli.py serve               # web chat UI

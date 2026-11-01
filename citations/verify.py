@@ -1,4 +1,4 @@
-"""PRAMANA -- the citation verifier.
+"""Citation gate -- the citation verifier.
 
 *Pramāṇa* is a valid means of knowledge; *śabda-pramāṇa* is textual authority.
 This module accepts a sentence only on textual authority: every emitted sentence

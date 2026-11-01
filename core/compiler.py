@@ -2,7 +2,7 @@
 
 Pipeline, in order, with the LLM appearing nowhere in it:
 
-    resolve -> facts -> SUTRA rules -> PRAMANA gate -> SETU matrix -> C-BOM
+    resolve -> facts -> compliance rules -> citation gate -> jurisdiction matrix -> C-BOM
 
 Recompilation with an autofix applied runs the identical pipeline over a
 patched fact table, so "this fix clears the blocker" is a claim the compiler
@@ -24,12 +24,12 @@ from core.schema import (
     Obligation,
     Severity,
 )
-from pramana.verify import VerificationReport, check_citation_integrity, verify_all
-from samhita.index import Corpus, load_corpus
-from setu.matrix import build_matrix
-from sutra.engine import evaluate
-from sutra.facts import FactTable, build_facts
-from sutra.loader import Rule, load_rules
+from citations.verify import VerificationReport, check_citation_integrity, verify_all
+from sources.index import Corpus, load_corpus
+from jurisdictions.matrix import build_matrix
+from compliance.engine import evaluate
+from compliance.facts import FactTable, build_facts
+from compliance.loader import Rule, load_rules
 
 LAW_VERSION = "corpus/provisions.jsonl @ ingest"
 
@@ -114,7 +114,7 @@ def compile_formulation(
     suppressed = list(engine.suppressed)
     for f_, rep in zip(engine.findings, reports):
         if not rep.kept:
-            suppressed.append((f_.rule_id, "PRAMANA: no sentence survived the gate"))
+            suppressed.append((f_.rule_id, "citation gate: no sentence survived the gate"))
 
     kept_ids = {k.rule_id for k in kept}
     obligations: list[Obligation] = [

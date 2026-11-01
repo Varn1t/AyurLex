@@ -1,14 +1,14 @@
-"""SAMBANDHA — the knowledge graph must not become a diagram.
+"""Knowledge graph — the knowledge graph must not become a diagram.
 
 The graph's whole claim is that it adds no new way to be wrong: derived edges
 restate facts already proved elsewhere, and the handful of authored edges are
-held to the SUTRA gate. These tests pin that claim.
+held to the rule-loader gate. These tests pin that claim.
 """
 from __future__ import annotations
 
 import pytest
 
-from sambandha.graph import TRANSIT_BLOCKED, load_graph
+from graph.graph import TRANSIT_BLOCKED, load_graph
 
 
 @pytest.fixture(scope="module")
@@ -37,7 +37,7 @@ def test_every_edge_endpoint_is_a_real_node(g):
 
 def test_rule_citations_match_the_rule_loader(g):
     """CITES is derived from the rules, so it must agree with them exactly."""
-    from sutra.loader import load_rules
+    from compliance.loader import load_rules
 
     for rule in load_rules():
         rid = f"rule:{rule.id}"
@@ -132,7 +132,7 @@ def test_subchunks_are_not_nodes(g):
 def test_graph_is_deterministic():
     """Same corpus, same graph. A graph that reshuffles between runs cannot be
     the basis of a reproducible answer."""
-    from sambandha.graph import build_graph
+    from graph.graph import build_graph
 
     a, b = build_graph(), build_graph()
     assert [(e.src, e.dst, e.kind) for e in a.edges] == \
@@ -166,7 +166,7 @@ def test_a_real_relationship_question_still_walks():
 def test_the_orchestrator_does_not_plan_an_unwalkable_graph_step():
     """The same false positive cost a planned step that could only fail, and
     it printed above the answer the user actually asked for."""
-    from yukti.orchestrate import plan
+    from planner.orchestrate import plan
 
     steps = plan("how do I apply to the NBA for approval under the 2024 rules?")
     assert not [s for s in steps if s.tool == "graph"]

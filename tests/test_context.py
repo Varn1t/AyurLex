@@ -191,7 +191,7 @@ def test_groundedness_is_not_zero_for_displayed_text():
 def test_groundedness_is_the_mean_of_what_is_shown():
     from rag.answer import verify_against_spans
     from rag.retriever import load_retriever
-    from pramana.verify import entailment_score
+    from citations.verify import entailment_score
 
     res = load_retriever().search("what does Section 7 of the Biological "
                                   "Diversity Act require",

@@ -88,11 +88,11 @@ def ch_contents(s: dict) -> str:
         ("6", "The corpus: sourcing, extraction, and the problems solved"),
         ("7", "Retrieval: the stack, and the number that forced it"),
         ("8", "The trust machinery: how hallucination is made structurally hard"),
-        ("9", "The compliance compiler: SUTRA, NIYAMA, SETU, C-BOM"),
-        ("10", "VARGIKARANA: classify before advising"),
-        ("11", "SAMBANDHA: the relational knowledge graph"),
-        ("12", "YUKTI: agentic orchestration that is a plan, not an improviser"),
-        ("13", "SAMPARK: escalation to a human IP facilitator"),
+        ("9", "The compliance compiler: rules, obligations, jurisdictions, C-BOM"),
+        ("10", "Classify before advising"),
+        ("11", "The relational knowledge graph"),
+        ("12", "Agentic orchestration that is a plan, not an improviser"),
+        ("13", "Escalation to a human IP facilitator"),
         ("14", "Multilingual delivery and the terminology lock"),
         ("15", "Conversation memory, and what the confidence score measures"),
         ("16", "Technology choices, and why each one"),
@@ -167,11 +167,11 @@ guarantees enforce that in code rather than by convention:</p>
     ("A finding without a citation cannot be serialised",
      "<code>core/schema.py</code> &mdash; pydantic validator"),
     ("A rule cannot cite a provision that was never extracted",
-     "<code>sutra/loader.py</code> &mdash; corpus binding at load"),
+     "<code>compliance/loader.py</code> &mdash; corpus binding at load"),
     ("A rule's anchor must be verbatim in the source PDF",
-     "<code>sutra/loader.py</code> + <code>scripts/verify_provisions.py</code>"),
+     "<code>compliance/loader.py</code> + <code>scripts/verify_provisions.py</code>"),
     ("A number or quotation with no traceable source is stripped",
-     "<code>pramana/verify.py</code> &mdash; exact-match paths"),
+     "<code>citations/verify.py</code> &mdash; exact-match paths"),
 ])}
 
 <h3>What is in it now</h3>
@@ -393,7 +393,7 @@ AYUSH primers &mdash; rank-separated as background, never citable as law.</p>
 the Madrid, Hague and Budapest treaties; EU
 Directive 2004/24/EC; case law; and live registry records. Each is a public
 document, and adding one is a registry entry in
-<code>samhita/ingest.py</code> plus a re-ingest. Chapter 20 states what that
+<code>sources/ingest.py</code> plus a re-ingest. Chapter 20 states what that
 absence currently costs.</p>
 
 <div class="warn">

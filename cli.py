@@ -29,8 +29,8 @@ from core.compiler import (  # noqa: E402
 )
 from core.resolver import load_resolver  # noqa: E402
 from core.schema import Formulation, Severity  # noqa: E402
-from samhita.index import load_corpus  # noqa: E402
-from sutra.loader import load_rules  # noqa: E402
+from sources.index import load_corpus  # noqa: E402
+from compliance.loader import load_rules  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 
@@ -93,7 +93,7 @@ def print_findings(result, show_citations: bool = True) -> None:
 
 
 def print_matrix(result) -> None:
-    print("\nSETU — jurisdiction matrix")
+    print("\nJurisdiction matrix")
     print("-" * 78)
     print(f"  {'JURIS':<6} {'STATUS':<12} {'CITES':<6} NEXT ACTION")
     for row in result.cbom.jurisdiction_matrix:
@@ -109,7 +109,7 @@ def print_matrix(result) -> None:
 def print_obligations(result) -> None:
     if not result.cbom.obligations:
         return
-    print(f"\nNIYAMA — {len(result.cbom.obligations)} obligation(s) triggered")
+    print(f"\nObligations — {len(result.cbom.obligations)} obligation(s) triggered")
     print("-" * 78)
     for o in result.cbom.obligations:
         print(f"  * {o.provision} — {o.duty}")
@@ -236,7 +236,7 @@ def cmd_timetravel(args) -> int:
 def cmd_rules(args) -> int:
     corpus = load_corpus()
     rules = load_rules(corpus=corpus)
-    print(f"{len(rules)} rule(s) loaded from sutra/rules/\n")
+    print(f"{len(rules)} rule(s) loaded from compliance/rules/\n")
     print(f"  {'RULE ID':<38} {'SEV':<12} {'STATUS':<11} CITATIONS")
     print("-" * 78)
     for r in rules:
@@ -336,7 +336,7 @@ def cmd_serve(args) -> int:
 def cmd_eval(args) -> int:
     from tests.eval_retrieval import DEV, HELD_OUT, evaluate
 
-    print("SAMHITA retrieval gold set\n")
+    print("Retrieval gold set\n")
     out = evaluate()
     print("\nDev set (fixed against; regression only)\n")
     evaluate(cases=DEV)
@@ -363,12 +363,12 @@ def cmd_reproduce(args) -> int:
 
 def cmd_graph(args) -> int:
     """The knowledge graph: what is in it, and what it says is connected."""
-    from sambandha.graph import load_graph
+    from graph.graph import load_graph
 
     g = load_graph()
     if args.stats or not args.node:
         s = g.stats()
-        print(f"SAMBANDHA knowledge graph — {s['nodes']} nodes, "
+        print(f"Knowledge graph — {s['nodes']} nodes, "
               f"{s['edges']} edges\n")
         print("  nodes")
         for k, v in s["by_node_kind"].items():
@@ -399,7 +399,7 @@ def cmd_graph(args) -> int:
 
 def cmd_path(args) -> int:
     """Walk between two things and print the chain of assertions."""
-    from sambandha.graph import load_graph
+    from graph.graph import load_graph
 
     g = load_graph()
     a, b = g.resolve(args.src), g.resolve(args.dst)
@@ -422,8 +422,8 @@ def cmd_path(args) -> int:
 
 def cmd_escalate(args) -> int:
     """Assemble a referral packet for a compiled formulation."""
-    from sampark.escalate import assess, render
-    from vargikarana.classify import facts_from_formulation, load_classes
+    from escalation.escalate import assess, render
+    from classification.classify import facts_from_formulation, load_classes
 
     f = load_formulation(args.file)
     result = compile_formulation(f, as_of=date.fromisoformat(args.as_of))
@@ -442,10 +442,10 @@ def cmd_escalate(args) -> int:
 
 
 def cmd_facilitators(args) -> int:
-    from sampark.escalate import load_registry
+    from escalation.escalate import load_registry
 
     reg = load_registry()
-    print(f"SAMPARK escalation directory — {len(reg.routes)} route(s)\n")
+    print(f"Escalation directory — {len(reg.routes)} route(s)\n")
     for r in reg.routes:
         mark = "OK  " if r.ok else "FAIL"
         basis = r.citation or ("uncited — " + r.uncited_authority[:60]
@@ -513,7 +513,7 @@ def cmd_plan(args) -> int:
     The plan prints before anything executes -- that is the point of building
     it in full up front rather than deciding step by step.
     """
-    from yukti.orchestrate import Trace, plan, run
+    from planner.orchestrate import Trace, plan, run
 
     question = " ".join(args.question)
     if args.dry_run:

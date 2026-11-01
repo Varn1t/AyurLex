@@ -1,4 +1,4 @@
-# SUTRA -- The Patents Act, 1970
+# Compliance rules -- The Patents Act, 1970
 #
 # Every anchor below is a verbatim span from Dataset/Patents Act 1970.pdf as
 # extracted into corpus/provisions.jsonl. The loader re-checks each one on

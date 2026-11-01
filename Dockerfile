@@ -10,9 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 RUN pip install --no-cache-dir --no-deps -e . \
- && python samhita/ingest.py \
- && python samhita/priorart.py \
- && python samhita/schedules.py
+ && python sources/ingest.py \
+ && python sources/priorart.py \
+ && python sources/schedules.py
 
 ENV OLLAMA_HOST=http://host.docker.internal:11434 \
     PYTHONUNBUFFERED=1

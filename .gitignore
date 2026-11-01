@@ -10,7 +10,7 @@
 # Local drafts and generated artifacts
 _drafts/
 
-# Generated corpus (rebuild with: python samhita/ingest.py)
+# Generated corpus (rebuild with: python sources/ingest.py)
 corpus/
 
 # Python

@@ -25,13 +25,13 @@ from pathlib import Path
 
 HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
 
-# First installed match wins. `qwen3.5-small` is qwen3.5:4b with a 2048-token
-# context, built from the repo's MODELFILE:  ollama create qwen3.5-small -f MODELFILE
+# First installed match wins. qwen2.5:1.5b leads on measurement, not size: on
+# the same 8 in-corpus questions it got 8/8 answers past the citation gate at
+# ~2s each, while qwen3.5:4b got 2/8 at ~5s -- it paraphrases further from the
+# statute, so the gate rightly withholds it and the user sees an abstention.
 PREFERRED = [
-    "qwen3.5-small:latest",
-    "qwen3.5-small",
-    "qwen3.5:4b",
     "qwen2.5:1.5b",
+    "qwen3.5:4b",
     "llama3.2:latest",
     "llama3.1:latest",
     "llama3:latest",

@@ -1,13 +1,13 @@
-"""YUKTI -- agentic, multi-source orchestration.
+"""Planner -- agentic, multi-source orchestration.
 
-*Yukti* is reasoned method: agentic, multi-source orchestration to deepen
+Agentic, multi-source orchestration to deepen
 multi-step reasoning. This module is that layer
 -- built to a specific rule that is worth stating before any code:
 
     THE PLAN IS DETERMINISTIC. THE TOOLS ARE DETERMINISTIC. THE COMPOSITION IS
     DETERMINISTIC. The only place a model appears is inside a retrieval step,
     phrasing an answer over spans it was handed -- exactly where it already
-    was, behind exactly the same PRAMANA gate.
+    was, behind exactly the same citation gate.
 
 That is an unusual shape for an "agent", and it is deliberate. The ordinary
 agentic pattern hands a model a tool list and lets it decide what to call, in
@@ -36,7 +36,7 @@ Not autonomy. Three concrete things a single-shot pipeline cannot do:
    taxa, the category, the findings) is the context the questions need.
 
 3. RELATIONSHIP QUESTIONS. "How does the Nagoya Protocol reach me?" is a graph
-   walk, not a retrieval. The planner routes it to SAMBANDHA.
+   walk, not a retrieval. The planner routes it to the knowledge graph.
 
 EVERY RUN LEAVES A TRACE
 ------------------------
@@ -353,7 +353,7 @@ def _tool_ask(step: Step, ctx: dict) -> StepResult:
 def _tool_compile(step: Step, ctx: dict) -> StepResult:
     from core.compiler import compile_formulation
     from rag.chat import formulation_from_text
-    from vargikarana.classify import facts_from_formulation, load_classes
+    from classification.classify import facts_from_formulation, load_classes
 
     f = formulation_from_text(step.query)
     if f is None:
@@ -363,7 +363,7 @@ def _tool_compile(step: Step, ctx: dict) -> StepResult:
     ctx["compile_result"] = result
     cb = result.cbom
     # Classification runs on the same facts read off the same text, through the
-    # same VARGIKARANA path the chat layer uses -- not a second implementation.
+    # same classification path the chat layer uses -- not a second implementation.
     cls = load_classes().classify(facts_from_formulation(f, step.query))
     ctx["classification"] = cls
 
@@ -388,11 +388,11 @@ def _tool_compile(step: Step, ctx: dict) -> StepResult:
     return StepResult(step=step, ok=True, summary="\n".join(lines),
                       citations=cits, layer="IN",
                       groundedness=cb.groundedness_score, data=result,
-                      backend="sutra rule engine (deterministic)")
+                      backend="compliance rule engine (deterministic)")
 
 
 def _tool_graph(step: Step, ctx: dict) -> StepResult:
-    from sambandha.graph import load_graph
+    from graph.graph import load_graph
 
     g = load_graph()
     ends = _graph_endpoints(step.query, g)
@@ -402,7 +402,7 @@ def _tool_graph(step: Step, ctx: dict) -> StepResult:
             summary="I could not identify two things in that question to walk "
                     "between. Name them as they appear in the corpus — an "
                     "instrument, a provision id, or a concept.",
-            backend="sambandha knowledge graph (deterministic)")
+            backend="graph knowledge graph (deterministic)")
     a, b = ends[0], ends[1]
     p = g.path(a.id, b.id)
     if p is None:
@@ -411,14 +411,14 @@ def _tool_graph(step: Step, ctx: dict) -> StepResult:
             summary=f"There is no path in the graph between {a.label} and "
                     f"{b.label}. That is a real answer: the corpus asserts no "
                     f"relationship between them.",
-            backend="sambandha knowledge graph (deterministic)")
+            backend="graph knowledge graph (deterministic)")
     return StepResult(step=step, ok=True, summary="\n".join(g.explain(p)),
                       layer=("INTL" if p.crosses_jurisdiction() else "IN"),
-                      data=p, backend="sambandha knowledge graph (deterministic)")
+                      data=p, backend="graph knowledge graph (deterministic)")
 
 
 def _graph():
-    from sambandha.graph import load_graph
+    from graph.graph import load_graph
 
     return load_graph()
 
@@ -484,7 +484,7 @@ _NOT_A_NAME = {
 
 
 def _tool_escalate(step: Step, ctx: dict) -> StepResult:
-    from sampark.escalate import assess, render
+    from escalation.escalate import assess, render
 
     ref = assess(compile_result=ctx.get("compile_result"),
                  answer=ctx.get("last_abstained_answer"),
@@ -492,7 +492,7 @@ def _tool_escalate(step: Step, ctx: dict) -> StepResult:
                  user_asked=bool(step.args.get("user_asked")),
                  redact=bool(ctx.get("redact")))
     return StepResult(step=step, ok=ref.needed, summary=render(ref),
-                      data=ref, backend="sampark escalation (deterministic)")
+                      data=ref, backend="escalation escalation (deterministic)")
 
 
 TOOLS: dict[str, Callable[[Step, dict], StepResult]] = {

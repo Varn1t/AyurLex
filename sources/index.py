@@ -1,9 +1,9 @@
-"""SAMHITA index: exact provision lookup + hybrid lexical retrieval.
+"""Sources index: exact provision lookup + hybrid lexical retrieval.
 
 Two access paths, and the distinction matters:
 
   * cite() -- exact, deterministic lookup of a declared provision. This is the
-    only path a SUTRA rule may use. A rule cannot go fishing in the index for
+    only path a compliance rule may use. A rule cannot go fishing in the index for
     something that supports it; it declares its authority up front and we fetch
     that exact text.
   * search() -- BM25 retrieval with mandatory metadata pre-filters. Used for
@@ -49,7 +49,7 @@ class Corpus:
     def __init__(self, path: Path = PROVISIONS):
         if not path.exists():
             raise CorpusError(
-                f"{path} not found. Run:  python samhita/ingest.py"
+                f"{path} not found. Run:  python sources/ingest.py"
             )
         self.records: list[dict] = []
         with path.open(encoding="utf-8") as fh:

@@ -200,7 +200,7 @@ def d_layers(page, s):
     y, h = 116, 44
     band_label(page, LX, y, LW, h, "ORCHESTRATION")
     for i, (n, d) in enumerate([
-            ("YUKTI", "deterministic plan · typed tools · hard step cap · "
+            ("Planner", "deterministic plan · typed tools · hard step cap · "
                       "auditable trace"),
             ("CHAT", "intent routing · session state · 3-turn follow-ups")]):
         w = (CW - 8) / 2
@@ -210,12 +210,12 @@ def d_layers(page, s):
     y, h = 168, 96
     band_label(page, LX, y, LW, h, "REASONING")
     mods = [
-        ("SUTRA", f"{s['rules']} rules as data\nverified at load", False),
-        ("VARGIKARANA", "6 regulatory\ncategories", False),
-        ("SAMBANDHA", f"{s['graph_nodes']:,}-node\nknowledge graph", False),
-        ("SAMPARK", f"{s['routes']} escalation\nroutes", False),
-        ("NIYAMA", "obligations:\nwho, and when", False),
-        ("SETU", "jurisdiction\nmatrix", False),
+        ("Rules", f"{s['rules']} rules as data\nverified at load", False),
+        ("Classification", "6 regulatory\ncategories", False),
+        ("Knowledge graph", f"{s['graph_nodes']:,}-node\nknowledge graph", False),
+        ("Escalation", f"{s['routes']} escalation\nroutes", False),
+        ("Obligations", "obligations:\nwho, and when", False),
+        ("Jurisdictions", "jurisdiction\nmatrix", False),
         ("RESOLVER", "any script →\nbotanical taxon", False),
         ("RAG", "hybrid retrieval\n+ LLM phrasing", True),
     ]
@@ -230,7 +230,7 @@ def d_layers(page, s):
     y, h = 272, 44
     band_label(page, LX, y, LW, h, "VERIFICATION")
     box(page, R(CX, y, CW, h), fill=AMBER_PALE, line=AMBER_LINE, width=1.2)
-    text(page, R(CX + 10, y + 7, CW - 20, 14), "PRAMANA — the citation gate",
+    text(page, R(CX + 10, y + 7, CW - 20, 14), "Citation gate — the citation gate",
          size=9.6, font="hebo", color=AMBER_DARK)
     text(page, R(CX + 10, y + 22, CW - 20, 16),
          "Every sentence checked against the spans it cites.  Numbers, "
@@ -243,7 +243,7 @@ def d_layers(page, s):
     band_label(page, LX, y, LW, h, "EVIDENCE")
     box(page, R(CX, y, CW, h), fill=SLATE_PALE, line=SLATE_LINE, width=1.0)
     text(page, R(CX + 10, y + 7, CW - 20, 14),
-         f"SAMHITA — {s['provisions']:,} page-anchored provisions from "
+         f"Sources — {s['provisions']:,} page-anchored provisions from "
          f"{s['instruments']} instruments",
          size=9.6, font="hebo", color=INK)
     text(page, R(CX + 10, y + 23, CW - 20, 30),
@@ -306,7 +306,7 @@ def d_flow(page, s):
         ("weak-retrieval check", "nothing good enough → abstain", "STOP"),
         ("citations stream", "~0.1 s, before a word of prose", None),
         ("draft", "the model sees the top 3 extracts, nothing else", "MODEL"),
-        ("PRAMANA gate", "verified against those same 3 extracts", None),
+        ("citation gate", "verified against those same 3 extracts", None),
         ("final", "what was dropped is shown, not deleted", None),
     ]
     y = 100
@@ -349,11 +349,11 @@ def d_flow(page, s):
         ("parse", "ingredients, claims, markets, filing intent"),
         ("RESOLVER", "every name → binomial, or an explicit refusal to guess"),
         ("build facts", "tri-state; every fact records why it holds"),
-        ("VARGIKARANA", "the category, or the one question that settles it"),
-        ("SUTRA", "declarative rules; only VERIFIED rules may emit"),
-        ("PRAMANA", "each finding checked against its own cited span"),
-        ("NIYAMA", "obligations — who discharges each, and when"),
-        ("SETU", "jurisdiction matrix; abstains where corpus is absent"),
+        ("Classification", "the category, or the one question that settles it"),
+        ("Rules", "declarative rules; only VERIFIED rules may emit"),
+        ("Citation gate", "each finding checked against its own cited span"),
+        ("Obligations", "obligations — who discharges each, and when"),
+        ("Jurisdictions", "jurisdiction matrix; abstains where corpus is absent"),
         ("C-BOM", "signed, digest-stable artifact"),
     ]
     y = 100
@@ -401,7 +401,7 @@ def d_gates(page, s):
          "unrepresentable, not merely discouraged."),
         ("2", "RULE LOADER",
          "A rule cannot cite a provision\nthat was never extracted",
-         "sutra/loader.py — corpus binding at load",
+         "compliance/loader.py — corpus binding at load",
          "A rule that fails is demoted to UNVERIFIED and refused permission "
          "to emit. The abstention is printed, not hidden."),
         ("3", "ANCHOR CHECK",
@@ -411,7 +411,7 @@ def d_gates(page, s):
          "13 anchors re-verified, zero drift."),
         ("4", "CITATION GATE",
          "A number, quotation or instrument\nname with no source is stripped",
-         "pramana/verify.py — exact-match paths",
+         "citations/verify.py — exact-match paths",
          "Each path was added because a real model failed it during the "
          "build."),
     ]

@@ -8,7 +8,7 @@
 # potential and a clinical-evidence burden. Same plants, opposite advice.
 #
 # This file is data, not code, and every provision id in it is verified against
-# the corpus at load time exactly like a SUTRA rule or a concept: a category
+# the corpus at load time exactly like a compliance rule or a concept: a category
 # pointing at a provision that does not resolve fails loudly instead of
 # quietly citing nothing.
 #

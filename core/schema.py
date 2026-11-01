@@ -93,7 +93,7 @@ class ClaimType(str, Enum):
 
 
 class VerificationStatus(str, Enum):
-    """Promotion gate for a SUTRA rule. Only VERIFIED rules may emit findings
+    """Promotion gate for a compliance rule. Only VERIFIED rules may emit findings
     in a production compile; see docs/PROVISION_VERIFICATION.md."""
 
     UNVERIFIED = "UNVERIFIED"
@@ -120,7 +120,7 @@ class Quantity(BaseModel):
 class Citation(BaseModel):
     """A pointer into the ingested corpus plus the verbatim span relied on.
 
-    quote MUST appear in the cited provision's text. PRAMANA re-checks this at
+    quote MUST appear in the cited provision's text. The citation gate re-checks this at
     emit time against corpus/provisions.jsonl, so a citation whose quote has
     drifted from the primary source fails the build instead of shipping.
     """
@@ -189,7 +189,7 @@ class Finding(BaseModel):
 
 
 class Obligation(BaseModel):
-    """NIYAMA output: a duty triggered, with the act that discharges it."""
+    """Obligations output: a duty triggered, with the act that discharges it."""
 
     id: str
     jurisdiction: Jurisdiction
@@ -271,7 +271,7 @@ class Formulation(BaseModel):
 
 
 class JurisdictionRow(BaseModel):
-    """One row of the SETU matrix."""
+    """One row of the jurisdiction matrix."""
 
     jurisdiction: Jurisdiction
     patentability: str

@@ -24,7 +24,7 @@ Calling Bhashini sends the text to a remote service. That is a real change from
   * It is OFF unless credentials are configured. No credentials, no call, no
     prompt, no degradation -- the local path is unchanged.
   * AYURLEX_BHASHINI=0 turns it off even when credentials are present.
-  * Nothing is written to disk here, in or out. The KAVACH rule is untouched:
+  * Nothing is written to disk here, in or out. The no-disk rule is untouched:
     sessions stay in-process and ephemeral.
   * `status()` reports whether it is on, and the health endpoint serves that,
     so a user is never translated remotely without being able to see it.

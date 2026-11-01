@@ -1,4 +1,4 @@
-"""SUTRA engine: evaluate rules against facts, emit Findings.
+"""Rule engine: evaluate rules against facts, emit Findings.
 
 The whole legal outcome surface of the product is this file plus the YAML. No
 prompt decides whether a provision is triggered; a predicate does. That is what
@@ -21,9 +21,9 @@ from core.schema import (
     Severity,
     VerificationStatus,
 )
-from samhita.index import Corpus, load_corpus
-from sutra.facts import FactTable
-from sutra.loader import Rule, RuleAutofix, RuleCitation
+from sources.index import Corpus, load_corpus
+from compliance.facts import FactTable
+from compliance.loader import Rule, RuleAutofix, RuleCitation
 
 _TEMPLATE = re.compile(r"\{\{\s*([a-zA-Z0-9_.\[\]]+)\s*\}\}")
 

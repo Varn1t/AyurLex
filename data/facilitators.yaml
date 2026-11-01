@@ -1,4 +1,4 @@
-# SAMPARK — the human escalation directory.
+# Escalation — the human escalation directory.
 #
 # The assistant needs a path to escalate to a human IP facilitator. This file
 # is that path, expressed the way everything else in this system is expressed:
@@ -11,7 +11,7 @@
 #
 #   mandate     -- what this office actually does, in one sentence
 #   basis       -- the corpus id of the provision that establishes it, plus a
-#                  verbatim anchor. Verified at load exactly like a SUTRA rule:
+#                  verbatim anchor. Verified at load exactly like a compliance rule:
 #                  an entry whose anchor has drifted is dropped and reported.
 #   site        -- the official domain, for a user who has to find the office
 #   contact     -- deliberately left as deployment configuration. A deploying

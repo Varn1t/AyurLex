@@ -329,6 +329,16 @@ def facts_from_formulation(form, text: str = "") -> dict[str, bool | None]:
         if f["purified_fraction"] is None:
             f["purified_fraction"] = True
 
+    # Stated fields settle what prose can only suggest. These were ignored, so
+    # a product entered as "classical: yes" was still asked whether it was
+    # classical. Unset (None) stays unset, so the question is still asked.
+    classical = getattr(form, "is_classical_formulation", None)
+    if classical is not None:
+        f["classical_text_formulation"] = classical
+    process = getattr(form, "process", None)
+    if getattr(process, "standardised_marker", None):
+        f["purified_fraction"] = True
+
     return f
 
 

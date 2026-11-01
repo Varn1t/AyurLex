@@ -114,6 +114,21 @@ Four guarantees, each enforced in code rather than by convention:
 An unverified rule can match the facts and still emit nothing. That abstention
 is printed in the report rather than hidden.
 
+## The web app
+
+`ayurlex serve` opens a five-view app rather than a bare chat box:
+
+| View | What it does |
+|---|---|
+| **Assistant** | Cited answers, streamed; click any citation to read the provision at its page |
+| **Check a product** | A form for a formulation — ingredients in any script, claims, markets, evidence — compiled straight to findings, obligations and fixes (`POST /api/compile`, no regex parsing, no model) |
+| **Library** | All 35 instruments, filterable by Indian / international / background, each opening to its table of contents (`/api/sources`) |
+| **Connections** | Walks the knowledge graph between two instruments, every hop cited |
+| **Get expert help** | The facilitator directory with each office's establishing provision, and a referral packet built from the session |
+
+One session runs across all five, so a product checked in the form can be
+fixed in the Assistant and handed off as a referral packet.
+
 ## Run it
 
 ```bash
@@ -728,7 +743,7 @@ annexures, not claims), legal advice, and outcome prediction.
 252/252 tests passing · 17/17 scope guardrails (foreign law, off-topic, clinical, evasion, injection)
 10/10 identical C-BOM digests
 3,491 provisions from 35 instruments · 17/17 retrieval gold set · 2/2 abstentions
-held-out set (31 + 8 out-of-scope, never tuned against): recall@5 0.84 · recall@1 0.45 · 8/8 abstentions
+held-out set (31 + 8 out-of-scope, never tuned against): recall@5 0.81 · recall@1 0.48 · 8/8 abstentions
 3,392 graph nodes · 4,643 edges · 0 unverified curated links
 12/12 escalation routes verified against their establishing provision
 questions answerable in 11 languages · runs with zero network calls
@@ -740,8 +755,8 @@ Bhashini translation available, off unless configured
 1. **Raise recall@1, and keep the held-out set honest.** `ayurlex eval`
    reports three sets: the original 17 (written with the lexicon, a smoke
    test), a dev set (held out once at 0.50 recall@5, then fixed against —
-   now 0.93), and a fresh held-out set written before those fixes (0.84
-   recall@5, 0.45 recall@1). The right section is usually in the top five but
+   now 0.93), and a fresh held-out set written before those fixes (0.81
+   recall@5, 0.48 recall@1). The right section is usually in the top five but
    not first. Once the held-out misses are fixed against, that set becomes
    dev and a new one must be written. Target: 300+ items. Items
    written by someone who has not seen the lexicon are what make the number

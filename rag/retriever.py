@@ -685,7 +685,11 @@ class HybridRetriever:
 
             # The question's intent (how long / penalty / challenge /
             # infringement ...) named in the drafter's own heading.
-            if heads and any(t in head for t in heads):
+            # Only within the Act the question is about, when it names one:
+            # "how long does an Indian patent last" must not pull the GI and
+            # Trade Marks duration sections up beside Patents Act s.53.
+            if (heads and any(t in head for t in heads)
+                    and (not acts or r["act_id"] in acts)):
                 base *= 2.2
                 why.append("heading matches what the question asks for")
 

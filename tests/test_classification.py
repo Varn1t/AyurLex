@@ -210,3 +210,21 @@ def test_facts_asserted_by_the_user_are_not_overwritten_by_prose():
     session.class_facts["purified_fraction"] = True
     respond("my churna contains amla and haritaki", session)
     assert session.class_facts["purified_fraction"] is True
+
+
+def test_structured_fields_settle_what_prose_only_suggests():
+    """A formulation entered with is_classical_formulation / a standardised
+    marker must not be asked those questions again. Both fields were once
+    ignored by facts_from_formulation."""
+    import json
+
+    from classification.classify import facts_from_formulation
+    from core.schema import Formulation
+
+    f = Formulation.model_validate(
+        json.load(open("fixtures/triphala_classical.json", encoding="utf-8")))
+    assert facts_from_formulation(f)["classical_text_formulation"] is None
+    f.is_classical_formulation = True
+    assert facts_from_formulation(f)["classical_text_formulation"] is True
+    f.process.standardised_marker = "5% withanolides"
+    assert facts_from_formulation(f)["purified_fraction"] is True

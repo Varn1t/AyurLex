@@ -355,6 +355,86 @@ def escalate(req: Escalate) -> JSONResponse:
     return JSONResponse(referral_payload(ref))
 
 
+class CompileReq(BaseModel):
+    formulation: dict
+    session_id: str | None = None
+
+
+@app.post("/api/compile")
+def compile_structured(req: CompileReq) -> JSONResponse:
+    """Compile a formulation entered in the form, as structured data.
+
+    The chat path has to pull ingredients out of a sentence with a regex; the
+    form already has them as fields, so they go straight to the compiler and
+    nothing is guessed. Same session store, so "apply the fixes" and the
+    referral packet work afterwards in chat exactly as they would there.
+    """
+    from pydantic import ValidationError
+
+    from core.schema import Formulation
+    from rag.chat import Turn, compile_reply
+    from rag.stream import compile_payload
+
+    try:
+        f = Formulation.model_validate(req.formulation)
+    except ValidationError as e:
+        return JSONResponse({"error": "invalid formulation",
+                             "detail": e.errors(include_url=False)},
+                            status_code=422)
+    if not f.ingredients:
+        return JSONResponse({"error": "add at least one ingredient"},
+                            status_code=422)
+
+    sid = req.session_id or uuid.uuid4().hex[:12]
+    session = SESSIONS.setdefault(sid, Session(as_of=date.today()))
+    reply = compile_reply(f, session)
+    session.turns.append(Turn(role="assistant", text=reply.text,
+                              intent=reply.intent))
+    payload = {
+        "session_id": sid, "intent": reply.intent, "text": reply.text,
+        "citations": [], "abstained": False, "groundedness": None,
+        "backend": "rule engine · no model", "concept": "", "taxa": [],
+        "findings": [],
+    }
+    payload.update(compile_payload(reply.compile_result))
+    if getattr(reply, "classification", None) is not None:
+        from classification.classify import classification_payload
+
+        payload["classification"] = classification_payload(reply.classification)
+    return JSONResponse(payload)
+
+
+@app.get("/api/sources")
+def sources() -> JSONResponse:
+    """Every instrument in the corpus, with how much of it was extracted."""
+    from sources.index import load_corpus
+
+    acts: dict[str, dict] = {}
+    for r in load_corpus().records:
+        a = acts.setdefault(r["act_id"], {
+            "act_id": r["act_id"], "title": r["act_title"],
+            "type": r["instrument_type"], "jurisdiction": r["jurisdiction"],
+            "rank": r["authority_rank"], "citable": r.get("citable", True),
+            "pdf": r["source_pdf"], "provisions": 0,
+        })
+        a["provisions"] += 1
+    return JSONResponse(sorted(acts.values(),
+                               key=lambda a: (a["rank"], a["title"])))
+
+
+@app.get("/api/sources/{act_id}")
+def source_provisions(act_id: str) -> JSONResponse:
+    """The table of contents of one instrument, in document order."""
+    from sources.index import load_corpus
+
+    rows = [{"corpus_id": r["corpus_id"], "section": r["section"],
+             "heading": r["heading"], "page": r["page_start"]}
+            for r in load_corpus().records if r["act_id"] == act_id]
+    if not rows:
+        return JSONResponse({"error": "no such instrument"}, status_code=404)
+    return JSONResponse(rows)
+
+
 @app.get("/api/provision/{corpus_id:path}")
 def provision(corpus_id: str) -> JSONResponse:
     """Click-to-source: the full provision behind any citation."""

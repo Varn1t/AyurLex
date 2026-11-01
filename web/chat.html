@@ -104,20 +104,283 @@
     font:15px/1.65 "IBM Plex Sans","IBM Plex Sans Devanagari",
          "Noto Sans Tamil","Noto Sans Telugu",ui-sans-serif,-apple-system,
          "Segoe UI",sans-serif;
-    display:flex; flex-direction:column;
+    display:grid; grid-template-columns:244px minmax(0,1fr);
+    height:100vh; overflow:hidden;
     -webkit-font-smoothing:antialiased;
   }
   ::selection { background:var(--accent-soft); color:var(--ink); }
   :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 
-  /* ------------------------------------------------------------ masthead -- */
-  header {
-    flex:0 0 auto; background:var(--surface);
-    border-bottom:1px solid var(--line);
-    display:grid; grid-template-columns:auto 1fr auto;
-    align-items:center; gap:0 16px;
-    padding:13px 22px;
+  /* --------------------------------------------------------------- shell -- */
+  /* A rail of tools rather than a single chat box: the assistant is one of
+     five ways into the same verified corpus, and the other four (a structured
+     product check, the library, the graph, the human route) were already in
+     the backend with no way to reach them from the page. */
+  .rail {
+    background:var(--surface); border-right:1px solid var(--line);
+    display:flex; flex-direction:column; gap:20px; min-height:0;
+    padding:18px 14px 14px; overflow-y:auto;
   }
+  .brand { display:flex; align-items:center; gap:11px; padding:0 6px; }
+  .brand h1 {
+    font-family:Spectral,Georgia,serif; font-size:21px; font-weight:600;
+    margin:0; line-height:1.05; letter-spacing:-.012em;
+  }
+  .brand .tag {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9px;
+    letter-spacing:.11em; text-transform:uppercase; color:var(--muted);
+    display:block; margin-top:4px; line-height:1.4;
+  }
+  .nav { display:flex; flex-direction:column; gap:2px; }
+  .nav button {
+    display:flex; align-items:center; gap:11px; width:100%;
+    font:inherit; font-size:14px; text-align:left; padding:9px 11px;
+    border:0; border-radius:var(--r-sm); background:none;
+    color:var(--ink-soft); cursor:pointer;
+    transition:background .12s, color .12s;
+  }
+  .nav svg {
+    width:17px; height:17px; flex:0 0 auto; fill:none; stroke:currentColor;
+    stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;
+  }
+  .nav button:hover { background:var(--surface-2); color:var(--ink); }
+  .nav button[aria-current="page"] {
+    background:var(--accent-soft); color:var(--accent); font-weight:600;
+  }
+  .rail-foot { margin-top:auto; display:flex; flex-direction:column; gap:10px; }
+  .statcard {
+    border:1px solid var(--line); border-radius:var(--r-md);
+    padding:11px 13px; background:var(--paper);
+  }
+  .statcard .live {
+    display:flex; align-items:center; font-size:12px; color:var(--ink-soft);
+    margin-bottom:7px; line-height:1.35;
+  }
+  .statcard .row {
+    display:flex; justify-content:space-between; gap:8px; padding:2px 0;
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+    color:var(--muted); font-variant-numeric:tabular-nums;
+  }
+  .statcard .row b { color:var(--ink); font-weight:600; }
+  .statcard.bad .dot {
+    background:var(--blocker);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--blocker) 18%, transparent);
+  }
+  .theme {
+    font:inherit; font-size:12px; color:var(--muted); background:none;
+    border:1px solid var(--line); border-radius:var(--r-sm);
+    padding:6px 10px; cursor:pointer; text-align:left;
+  }
+  .theme:hover { color:var(--ink); border-color:var(--accent); }
+
+  .content { display:flex; flex-direction:column; min-width:0; min-height:0; }
+  .view { flex:1 1 auto; display:flex; flex-direction:column; min-height:0; }
+  .view[hidden] { display:none; }
+  .viewbar {
+    flex:0 0 auto; padding:15px 26px 13px; background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  .viewbar h2 {
+    font-family:Spectral,Georgia,serif; font-size:21px; font-weight:600;
+    margin:0; line-height:1.2; letter-spacing:-.01em;
+  }
+  .viewbar p { margin:3px 0 0; font-size:13px; color:var(--muted); max-width:78ch; }
+  .pane { flex:1 1 auto; overflow-y:auto; }
+  .wrap.wide { max-width:1080px; }
+
+  /* --------------------------------------------------- shared components -- */
+  .card {
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--r-lg); padding:18px 20px; box-shadow:var(--shadow-1);
+  }
+  .card + .card { margin-top:14px; }
+  .card > h3, .kicker {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+    margin:0 0 13px; font-weight:600;
+  }
+  .lede { margin:0 0 18px; color:var(--ink-soft); max-width:68ch; }
+  .field { display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .field > span, .lbl { font-size:12.5px; font-weight:500; color:var(--ink-soft); }
+  .help, .field > .help { font-size:11.5px; color:var(--muted); line-height:1.5; font-weight:400; }
+  a { color:var(--accent); text-underline-offset:2px; }
+  .in {
+    font:inherit; font-size:14px; padding:9px 12px; width:100%;
+    border:1px solid var(--line); border-radius:var(--r-sm);
+    background:var(--paper); color:var(--ink);
+    transition:border-color .12s, box-shadow .12s;
+  }
+  textarea.in { resize:vertical; min-height:68px; line-height:1.55; }
+  .in::placeholder { color:var(--muted); }
+  .in:focus {
+    outline:none; border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .two {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px;
+  }
+  .stack { display:flex; flex-direction:column; gap:14px; }
+  .btn {
+    font:inherit; font-size:13.5px; font-weight:600; padding:9px 16px;
+    border-radius:var(--r-sm); border:1px solid var(--line);
+    background:var(--surface); color:var(--ink-soft); cursor:pointer;
+    transition:border-color .12s, color .12s, filter .12s;
+  }
+  .btn:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
+  .btn.primary {
+    background:var(--accent); border-color:var(--accent); color:var(--accent-ink);
+  }
+  .btn.primary:hover:not(:disabled) { filter:brightness(1.15); color:var(--accent-ink); }
+  .btn:disabled { opacity:.45; cursor:default; }
+  .btn.small { font-size:12px; padding:5px 10px; font-weight:500; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .err { color:var(--blocker); font-size:13px; margin:0; }
+  .checks {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:9px 18px;
+  }
+  .check {
+    display:flex; gap:9px; align-items:flex-start; font-size:13.5px;
+    color:var(--ink-soft); cursor:pointer; line-height:1.45;
+  }
+  .check input { accent-color:var(--accent); margin-top:3px; flex:0 0 auto; }
+  /* Segmented choices: a native radio or button underneath, so keyboard and
+     screen readers get the real control. */
+  .seg { display:flex; flex-wrap:wrap; gap:6px; }
+  .seg label, .seg button {
+    font:inherit; font-size:13px; border:1px solid var(--line);
+    border-radius:999px; padding:6px 13px; cursor:pointer;
+    color:var(--ink-soft); background:var(--surface);
+    transition:border-color .12s, color .12s, background .12s;
+  }
+  .seg input { position:absolute; opacity:0; pointer-events:none; }
+  .seg label:has(input:checked), .seg button[aria-pressed="true"] {
+    background:var(--accent-soft); border-color:var(--accent); color:var(--accent);
+    font-weight:600;
+  }
+  .seg label:has(input:focus-visible) { outline:2px solid var(--accent); outline-offset:2px; }
+  .badge {
+    display:inline-block; font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:9px; letter-spacing:.09em; text-transform:uppercase;
+    border:1px solid var(--line); border-radius:2px; padding:2px 6px;
+    color:var(--muted); white-space:nowrap; font-weight:500;
+  }
+  .badge.india { color:var(--opportunity); border-color:var(--opportunity); }
+  .badge.intl { color:var(--info); border-color:var(--info); }
+  .badge.ok { color:var(--opportunity); border-color:var(--opportunity); background:var(--tint-opportunity); }
+  .badge.warn { color:var(--warning); border-color:var(--warning); background:var(--tint-warning); }
+  .empty { color:var(--muted); font-size:13.5px; padding:18px 0; }
+
+  /* --------------------------------------------------------- check view -- */
+  .ing-list { display:flex; flex-direction:column; gap:7px; }
+  .ing-row { display:flex; gap:7px; align-items:center; }
+  .ing-row .in { flex:1; }
+  .x {
+    flex:0 0 auto; width:34px; height:38px; border-radius:var(--r-sm);
+    border:1px solid var(--line); background:var(--surface);
+    color:var(--muted); cursor:pointer; font-size:17px; line-height:1;
+  }
+  .x:hover { color:var(--blocker); border-color:var(--blocker); }
+  #check-result:empty { display:none; }
+  #check-result { margin-top:22px; }
+  #check-result .msg { margin:0; }
+
+  /* ------------------------------------------------------- library view -- */
+  .toolbar {
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    margin-bottom:16px;
+  }
+  .toolbar .in { flex:1 1 240px; width:auto; }
+  .lib {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:12px;
+  }
+  .src-card {
+    font:inherit; text-align:left; color:var(--ink); cursor:pointer;
+    background:var(--surface); border:1px solid var(--line);
+    border-top:3px solid var(--opportunity); border-radius:var(--r-md);
+    padding:13px 15px 12px; display:flex; flex-direction:column; gap:8px;
+    transition:border-color .12s, box-shadow .12s, transform .12s;
+  }
+  .src-card.intl { border-top-color:var(--info); }
+  .src-card.bg { border-top-color:var(--muted); }
+  .src-card:hover { border-color:var(--accent); box-shadow:var(--shadow-2); }
+  .src-card .t { font-weight:600; font-size:14px; line-height:1.35; }
+  .src-card .m { display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; align-items:center; }
+  .src-card .n {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+    color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums;
+  }
+  .toc-head { display:flex; gap:12px; align-items:flex-start; justify-content:space-between; }
+  .toc-head h3 {
+    font-family:Spectral,Georgia,serif; font-size:19px; font-weight:600;
+    margin:0 0 4px; line-height:1.25; text-wrap:balance;
+  }
+  .toc { margin-top:14px; border-top:1px solid var(--line); max-height:60vh; overflow-y:auto; }
+  .toc button {
+    display:grid; grid-template-columns:62px 1fr auto; gap:12px; width:100%;
+    font:inherit; text-align:left; background:none; border:0; cursor:pointer;
+    border-bottom:1px solid var(--line-soft); padding:9px 4px;
+    color:var(--ink-soft); font-size:13.5px; align-items:baseline;
+  }
+  .toc button:hover { background:var(--accent-soft); color:var(--ink); }
+  .toc .s, .toc .p {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+    color:var(--accent); font-variant-numeric:tabular-nums;
+  }
+  .toc .p { color:var(--muted); }
+
+  /* --------------------------------------------------------- graph view -- */
+  .walk { list-style:none; margin:18px 0 0; padding:0; position:relative; }
+  .walk li { position:relative; padding:0 0 16px 30px; }
+  .walk li::before {
+    content:""; position:absolute; left:8px; top:12px; bottom:-4px;
+    width:2px; background:var(--line);
+  }
+  .walk li:last-child::before { display:none; }
+  .walk li::after {
+    content:""; position:absolute; left:3px; top:7px; width:12px; height:12px;
+    border-radius:50%; background:var(--surface); border:2px solid var(--accent);
+  }
+  .walk li:first-child::after, .walk li:last-child::after { background:var(--accent); }
+  .walk .edge {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+    margin-bottom:4px;
+  }
+  .walk .node {
+    font:inherit; text-align:left; width:100%; color:var(--ink);
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--r-md); padding:10px 13px; display:block;
+  }
+  .walk button.node { cursor:pointer; }
+  .walk button.node:hover { border-color:var(--accent); }
+  .walk .node .k { margin-right:8px; vertical-align:1px; }
+  .walk .note { font-size:12.5px; color:var(--muted); margin-top:5px; font-style:italic; }
+
+  /* ---------------------------------------------------------- help view -- */
+  .routes {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:12px; margin-top:14px;
+  }
+  .route {
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--r-md); padding:15px 16px; display:flex;
+    flex-direction:column; gap:8px;
+  }
+  .route h4 {
+    font-family:Spectral,Georgia,serif; font-size:16.5px; font-weight:600;
+    margin:0; line-height:1.3;
+  }
+  .route p { margin:0; font-size:13px; color:var(--ink-soft); line-height:1.6; }
+  .route .basis {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+    color:var(--muted); line-height:1.5;
+  }
+  .route .tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:auto; padding-top:4px; }
+  .route a { color:var(--accent); font-size:12.5px; }
+
   /* A seal rather than a logo: this is an instrument, and the monogram is
      the only ornament on the page. */
   .seal {
@@ -127,36 +390,10 @@
     font-family:Spectral,Georgia,serif; font-weight:700; font-size:15px;
     letter-spacing:.02em;
   }
-  .masthead { min-width:0; }
-  .masthead h1 {
-    font-family:Spectral,Georgia,serif; font-size:20px; font-weight:600;
-    letter-spacing:-.012em; margin:0; line-height:1.15;
-    text-wrap:balance;
-  }
-  .eyebrow {
-    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
-    letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
-    margin:0 0 3px;
-  }
-  header .tag {
-    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
-    color:var(--muted); display:block; margin-top:2px;
-  }
-  /* The corpus figures read as a seal strip: monospace, tabular, right-set. */
-  header .status {
-    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
-    line-height:1.5; color:var(--muted); text-align:right;
-    font-variant-numeric:tabular-nums; white-space:nowrap;
-    padding-left:16px; border-left:1px solid var(--line-soft);
-  }
   .dot {
     display:inline-block; width:6px; height:6px; border-radius:50%;
-    background:var(--opportunity); margin-right:6px; vertical-align:1px;
+    background:var(--opportunity); margin-right:8px; flex:0 0 auto;
     box-shadow:0 0 0 3px color-mix(in srgb, var(--opportunity) 18%, transparent);
-  }
-  header .status.bad .dot {
-    background:var(--blocker);
-    box-shadow:0 0 0 3px color-mix(in srgb, var(--blocker) 18%, transparent);
   }
 
   main { flex:1 1 auto; overflow-y:auto; scroll-behavior:smooth; }
@@ -648,12 +885,26 @@
   }
   .jump:hover { border-color:var(--accent); color:var(--accent); }
 
-  @media (max-width:640px) {
-    header { grid-template-columns:auto 1fr; padding:12px 16px; }
-    header .status {
-      grid-column:1 / -1; text-align:left; padding:9px 0 0;
-      border-left:0; border-top:1px solid var(--line-soft); margin-top:9px;
+  /* Phone and narrow tablet: the rail becomes a top bar with a scrolling row
+     of tabs, and the status card gives its space back to the content. */
+  @media (max-width:820px) {
+    body { grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
+    .rail {
+      flex-direction:column; gap:10px; padding:11px 16px 0;
+      border-right:0; border-bottom:1px solid var(--line); overflow:visible;
     }
+    .brand { padding:0; }
+    .brand .tag { display:none; }
+    .nav {
+      flex-direction:row; overflow-x:auto; gap:4px; margin:0 -16px;
+      padding:0 16px 9px; scrollbar-width:none;
+    }
+    .nav::-webkit-scrollbar { display:none; }
+    .nav button { width:auto; flex:0 0 auto; padding:7px 11px; font-size:13.5px; }
+    .rail-foot { display:none; }
+    .viewbar { padding:12px 16px 11px; }
+  }
+  @media (max-width:640px) {
     .wrap { padding:20px 16px 32px; }
     footer.composer { padding:12px 16px 11px; }
     .composer-foot { flex-direction:column; gap:7px; }
@@ -676,59 +927,302 @@
 </head>
 <body>
 
-<header>
-  <div class="seal" aria-hidden="true">AL</div>
-  <div class="masthead">
-    <p class="eyebrow">AYUSH IP &amp; regulatory compliance</p>
-    <h1>AyurLex</h1>
-    <span class="tag">grounded IP &amp; regulatory guidance for Ayurveda</span>
-  </div>
-  <span class="status" id="status"><span class="dot"></span>loading…</span>
-</header>
-
-<main>
-  <div class="wrap" id="thread" aria-live="polite" aria-busy="false">
-    <div class="intro" id="intro">
-      <p>Indian IP and AYUSH regulatory law, answered from primary sources —
-      statutes, rules and treaties — in English, Hindi, Tamil or Telugu. Every
-      answer quotes the provision it rests on, and no answer is given where the
-      corpus holds no authority.</p>
-
-      <div class="modes">
-        <div class="mode">
-          <h2>Ask</h2>
-          <p>A question gets an answer tied to the provision behind it. Click
-          any source to read the original text at its own page, with the
-          sentence the answer leaned on highlighted.</p>
-        </div>
-        <div class="mode">
-          <h2>Compile</h2>
-          <p>Describe a formulation and it is <em>compiled</em> instead of
-          answered: the regulatory category first, then blockers, obligations
-          and the fixes that clear them — from the rules, with no model
-          involved.</p>
-        </div>
-      </div>
-
-      <p class="chips-label">Start with one of these</p>
-      <div class="chips" id="chips"></div>
+<aside class="rail">
+  <div class="brand">
+    <div class="seal" aria-hidden="true">AL</div>
+    <div>
+      <h1>AyurLex</h1>
+      <span class="tag">IP &amp; regulatory law</span>
     </div>
   </div>
-</main>
 
-<footer class="composer">
-  <div class="composer-inner">
-    <textarea id="q" rows="1" aria-label="Your question or formulation"
-      placeholder="Ask a question, or describe your formulation…"></textarea>
-    <button class="send" id="send">Send</button>
+  <nav class="nav" aria-label="Sections">
+    <button type="button" data-view="ask" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg>
+      Assistant</button>
+    <button type="button" data-view="check">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg>
+      Check a product</button>
+    <button type="button" data-view="library">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5a1 1 0 0 1 1-1h4v16H5a1 1 0 0 1-1-1zM9 4h4v16H9zM14.5 4.6l3.9-1 3.6 14.6-3.9 1z"/></svg>
+      Library</button>
+    <button type="button" data-view="graph">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="9" cy="18" r="2.5"/><path d="M8.4 6.3l7.2 1.3M6.6 8.4l1.8 7.2M16.4 10l-5.6 6.2"/></svg>
+      Connections</button>
+    <button type="button" data-view="help">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+      Get expert help</button>
+  </nav>
+
+  <div class="rail-foot">
+    <div class="statcard" id="status">
+      <div class="live"><span class="dot"></span><span id="st-live">connecting…</span></div>
+      <div class="row"><span>provisions</span><b id="st-prov">—</b></div>
+      <div class="row"><span>rules verified</span><b id="st-rules">—</b></div>
+      <div class="row"><span>model</span><b id="st-model">—</b></div>
+    </div>
+    <button type="button" class="theme" id="theme">Theme: system</button>
   </div>
-  <div class="composer-foot">
-    <p class="disclaimer"><strong>Not legal advice.</strong> Informational
-    compliance analysis from primary statutory sources; it does not replace a
-    registered patent agent or advocate. Nothing you type is written to disk.</p>
-    <p class="hint">Enter to send · Shift+Enter for a new line</p>
+</aside>
+
+<div class="content">
+
+<!-- ============================================================ Assistant -->
+<section class="view" data-view="ask" aria-label="Assistant">
+  <div class="viewbar">
+    <h2>Assistant</h2>
+    <p>Ask about Indian IP or AYUSH regulation. Every answer quotes the
+    provision it rests on, and it says so when the law it holds does not cover
+    your question.</p>
   </div>
-</footer>
+  <main>
+    <div class="wrap" id="thread" aria-live="polite" aria-busy="false">
+      <div class="intro" id="intro">
+        <div class="tiles" id="intro-stats" aria-label="What the assistant holds">
+          <div class="tile"><div class="v" id="is-prov">—</div><div class="k">provisions</div></div>
+          <div class="tile"><div class="v" id="is-acts">—</div><div class="k">instruments</div></div>
+          <div class="tile"><div class="v" id="is-rules">—</div><div class="k">rules verified</div></div>
+          <div class="tile"><div class="v">0</div><div class="k">network calls</div></div>
+        </div>
+
+        <div class="modes">
+          <div class="mode">
+            <h2>Ask</h2>
+            <p>A question gets an answer tied to the provision behind it. Click
+            any source to read the original text at its own page, with the
+            sentence the answer leaned on highlighted.</p>
+          </div>
+          <div class="mode">
+            <h2>Check a product</h2>
+            <p>Describe a formulation here, or use the
+            <a href="#check" data-goto="check">product form</a>, and it is
+            <em>checked</em> rather than answered: the regulatory category, then
+            blockers, obligations and fixes, from the rules, with no model.</p>
+          </div>
+        </div>
+
+        <p class="chips-label">Start with one of these</p>
+        <div class="chips" id="chips"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="composer">
+    <div class="composer-inner">
+      <textarea id="q" rows="1" aria-label="Your question or formulation"
+        placeholder="Ask a question, or describe your formulation…"></textarea>
+      <button class="send" id="send">Send</button>
+    </div>
+    <div class="composer-foot">
+      <p class="disclaimer"><strong>Not legal advice.</strong> Informational
+      compliance analysis from primary statutory sources; it does not replace a
+      registered patent agent or advocate. Nothing you type is written to disk.</p>
+      <p class="hint">Enter to send · Shift+Enter for a new line</p>
+    </div>
+  </footer>
+</section>
+
+<!-- ======================================================== Check product -->
+<section class="view" data-view="check" aria-label="Check a product" hidden>
+  <div class="viewbar">
+    <h2>Check a product</h2>
+    <p>Enter a formulation and get its regulatory category, what blocks it,
+    what you must do, and how to fix it. Deterministic rules, no language
+    model, nothing saved.</p>
+  </div>
+  <div class="pane">
+    <div class="wrap wide">
+      <form id="check-form" class="stack" novalidate>
+        <div class="card">
+          <h3>The product</h3>
+          <div class="two">
+            <label class="field"><span>Product name</span>
+              <input class="in" name="name" placeholder="e.g. Triphala Churna"></label>
+            <label class="field"><span>Dosage form</span>
+              <select class="in" name="dosage_form">
+                <option value="churna">Churna (powder)</option>
+                <option value="vati">Vati (pill)</option>
+                <option value="kashaya">Kashaya (decoction)</option>
+                <option value="asava_arishta">Asava / Arishta</option>
+                <option value="taila">Taila (oil)</option>
+                <option value="ghrita">Ghrita (ghee)</option>
+                <option value="bhasma">Bhasma</option>
+                <option value="capsule">Capsule</option>
+                <option value="tablet">Tablet</option>
+                <option value="syrup">Syrup</option>
+                <option value="topical">Topical</option>
+                <option value="extract">Standardised extract</option>
+              </select></label>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <span class="lbl" id="ing-label">Ingredients</span>
+            <span class="help">Any name in any script: Amla, आंवला, Kadukkai,
+            <i>Terminalia chebula</i>. Each is resolved to its botanical taxon.</span>
+            <div class="ing-list" id="ing-list" role="group" aria-labelledby="ing-label"></div>
+            <div><button type="button" class="btn small" id="ing-add">+ Add ingredient</button></div>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <span class="lbl">Is it a classical formulation (from an authoritative text)?</span>
+            <div class="seg">
+              <label><input type="radio" name="classical" value="" checked><span>Not sure</span></label>
+              <label><input type="radio" name="classical" value="true"><span>Yes, classical</span></label>
+              <label><input type="radio" name="classical" value="false"><span>No, proprietary</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Claims and markets</h3>
+          <div class="two">
+            <label class="field"><span>Marketing claims</span>
+              <textarea class="in" name="claims" placeholder="One per line, e.g.&#10;Cures diabetes in 30 days"></textarea>
+              <span class="help">Exactly as they appear on the label or in ads.</span></label>
+            <label class="field"><span>What it is for</span>
+              <textarea class="in" name="indications" placeholder="One per line, e.g.&#10;digestive support"></textarea></label>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <span class="lbl">Patent filing plan</span>
+            <div class="seg">
+              <label><input type="radio" name="filing" value="IN_FIRST" checked><span>India first</span></label>
+              <label><input type="radio" name="filing" value="FOREIGN_FIRST"><span>Abroad first</span></label>
+              <label><input type="radio" name="filing" value="PCT"><span>PCT</span></label>
+              <label><input type="radio" name="filing" value="NONE"><span>Not filing</span></label>
+            </div>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <span class="lbl">Markets</span>
+            <div class="seg">
+              <label><input type="checkbox" name="market" value="IN" checked><span>India</span></label>
+              <label><input type="checkbox" name="market" value="US"><span>United States</span></label>
+              <label><input type="checkbox" name="market" value="EP"><span>Europe</span></label>
+              <label><input type="checkbox" name="market" value="JP"><span>Japan</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Process, evidence and applicant</h3>
+          <div class="two">
+            <label class="field"><span>How it is made</span>
+              <textarea class="in" name="process" placeholder="e.g. Sun-dried fruits, pulverised and sieved"></textarea></label>
+            <label class="field"><span>Standardised marker (if any)</span>
+              <input class="in" name="marker" placeholder="e.g. 5% withanolides">
+              <span class="help">A defined, standardised fraction changes the IP posture.</span></label>
+          </div>
+          <div class="checks" style="margin-top:14px">
+            <label class="check"><input type="checkbox" name="novel_step">The process has a non-obvious step</label>
+            <label class="check"><input type="checkbox" name="trad_use" checked>Documented traditional use</label>
+            <label class="check"><input type="checkbox" name="clinical">Clinical data</label>
+            <label class="check"><input type="checkbox" name="synergy">Synergy data for the combination</label>
+            <label class="check"><input type="checkbox" name="nba">NBA approval already obtained</label>
+            <label class="check"><input type="checkbox" name="permit">Foreign-filing permit obtained (s.39)</label>
+            <label class="check"><input type="checkbox" name="resident" checked>Applicant is resident in India</label>
+            <label class="check"><input type="checkbox" name="vaidya">Applicant is a practising vaidya or hakim</label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn primary" id="check-go">Check this product</button>
+          <button type="button" class="btn" id="check-example">Load an example</button>
+          <button type="reset" class="btn">Clear</button>
+          <p class="err" id="check-err" role="alert"></p>
+        </div>
+      </form>
+      <div id="check-result" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== Library -->
+<section class="view" data-view="library" aria-label="Library" hidden>
+  <div class="viewbar">
+    <h2>Library</h2>
+    <p>Every primary source the assistant answers from. Open one to read its
+    provisions, page-anchored to the original PDF.</p>
+  </div>
+  <div class="pane">
+    <div class="wrap wide">
+      <div class="card" id="toc-card" hidden style="margin-bottom:16px">
+        <div class="toc-head">
+          <div><h3 id="toc-title"></h3><div class="help" id="toc-meta"></div></div>
+          <button type="button" class="btn small" id="toc-close">Close</button>
+        </div>
+        <input class="in" type="search" id="toc-filter" placeholder="Filter sections…" style="margin-top:12px" aria-label="Filter sections">
+        <div class="toc" id="toc"></div>
+      </div>
+      <div class="toolbar">
+        <input class="in" type="search" id="lib-q" placeholder="Search instruments…" aria-label="Search instruments">
+        <div class="seg" id="lib-filter">
+          <button type="button" data-f="all" aria-pressed="true">All</button>
+          <button type="button" data-f="IN" aria-pressed="false">Indian law</button>
+          <button type="button" data-f="INTL" aria-pressed="false">International</button>
+          <button type="button" data-f="BG" aria-pressed="false">Background</button>
+        </div>
+      </div>
+      <div class="lib" id="lib"><p class="empty">Loading…</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== Connections -->
+<section class="view" data-view="graph" aria-label="Connections" hidden>
+  <div class="viewbar">
+    <h2>Connections</h2>
+    <p>How two pieces of law relate, walked through the knowledge graph. Every
+    step is a cited provision or a curated, source-verified link.</p>
+  </div>
+  <div class="pane">
+    <div class="wrap wide">
+      <div class="tiles" id="g-stats"></div>
+      <form class="card" id="g-form" style="margin-top:16px">
+        <h3>Find the path between</h3>
+        <div class="two">
+          <label class="field"><span>From</span>
+            <input class="in" name="src" list="g-nodes" placeholder="e.g. Nagoya Protocol"></label>
+          <label class="field"><span>To</span>
+            <input class="in" name="dst" list="g-nodes" placeholder="e.g. The Biological Diversity Act, 2002"></label>
+        </div>
+        <datalist id="g-nodes"></datalist>
+        <div class="actions" style="margin-top:14px">
+          <button type="submit" class="btn primary">Find connection</button>
+          <span class="help">Try:</span>
+          <div class="seg" id="g-examples"></div>
+        </div>
+      </form>
+      <div id="g-result" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= Expert help -->
+<section class="view" data-view="help" aria-label="Get expert help" hidden>
+  <div class="viewbar">
+    <h2>Get expert help</h2>
+    <p>Where a person has to take over: the office or professional for each
+    kind of question, with the provision that gives them that role.</p>
+  </div>
+  <div class="pane">
+    <div class="wrap wide">
+      <div class="card">
+        <h3>Referral packet</h3>
+        <p class="lede">A brief to hand a professional: what you asked, what was
+        established and on what authority, what could not be determined, and
+        who to take it to. It is built from your current session and returned
+        to you. Nothing is sent anywhere.</p>
+        <div class="actions">
+          <button type="button" class="btn primary" id="ref-go" disabled>Prepare referral packet</button>
+          <label class="check"><input type="checkbox" id="ref-redact" checked>Withhold my recipe</label>
+          <span class="help" id="ref-hint">Ask a question or check a product first.</span>
+        </div>
+        <div id="ref-out"></div>
+      </div>
+      <p class="kicker" style="margin-top:24px">Directory</p>
+      <div class="routes" id="routes"><p class="empty">Loading…</p></div>
+    </div>
+  </div>
+</section>
+
+</div>
 
 <dialog id="dlg" aria-labelledby="dlg-title">
   <div class="dlg-head">
@@ -772,24 +1266,26 @@ SUGGESTIONS.forEach(s => {
   chips.appendChild(b);
 });
 
+const setText = (id, v) => { const n = document.getElementById(id); if (n) n.textContent = v; };
 try {
 fetch('/api/health').then(r => r.json()).then(h => {
   const st = document.getElementById('status');
-  const model = h.ollama && h.ollama.running ? h.ollama.model : 'extractive only';
+  const model = h.ollama && h.ollama.running ? h.ollama.model : 'quotes only';
   // Say plainly whether anything typed here can leave the machine. Bhashini is
   // the only path that sends text off-box, it is off unless someone configured
   // it, and a user deciding whether to describe a proprietary formulation is
   // entitled to know which of the two states they are in before they type.
-  const reach = (h.bhashini && h.bhashini.enabled)
-    ? 'translation via Bhashini' : 'runs offline';
-  st.innerHTML =
-    `<span class="dot"></span>${h.provisions} provisions · ${h.verified}/${h.rules} rules verified` +
-    `<br>${esc(model)} · ${esc(reach)}`;
+  setText('st-live', (h.bhashini && h.bhashini.enabled)
+    ? 'Online · translation via Bhashini' : 'Running offline');
+  setText('st-prov', h.provisions.toLocaleString());
+  setText('st-rules', `${h.verified}/${h.rules}`);
+  setText('st-model', model);
+  setText('is-prov', h.provisions.toLocaleString());
+  setText('is-rules', `${h.verified}/${h.rules}`);
   if (!(h.ollama && h.ollama.running)) st.classList.add('bad');
 }).catch(() => {
-  const st = document.getElementById('status');
-  st.classList.add('bad');
-  st.innerHTML = '<span class="dot"></span>server unreachable';
+  document.getElementById('status').classList.add('bad');
+  setText('st-live', 'Server unreachable');
 });
 } catch (e) { /* cosmetic only -- never block the composer below */ }
 
@@ -843,7 +1339,8 @@ function traceBlock(t) {
   return d;
 }
 
-function addBot(data) {
+function addBot(data, target) {
+  target = target || thread;
   const m = el('div', 'msg bot');
   const b = el('div', 'bubble');
   b.appendChild(el('div', 'who', 'ayurlex · ' + data.intent));
@@ -865,8 +1362,13 @@ function addBot(data) {
     bar.appendChild(cp);
     b.appendChild(bar);
   } else {
+    // Local models write a little Markdown. Bold is kept (escaped first, so
+    // nothing else in the text can become markup) and stray rules are dropped.
     data.text.split('\n\n').forEach(par => {
-      if (par.trim()) b.appendChild(el('p', null, par));
+      if (!par.trim() || /^\s*-{3,}\s*$/.test(par)) return;
+      const p = el('p');
+      p.innerHTML = esc(par).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      b.appendChild(p);
     });
   }
 
@@ -997,8 +1499,9 @@ function addBot(data) {
   if (meta.children.length) b.appendChild(meta);
 
   m.appendChild(b);
-  thread.appendChild(m);
-  scroll();
+  target.appendChild(m);
+  if (target === thread) scroll();
+  return m;
 }
 
 // The regulatory category, or the question still needed to reach it. The
@@ -1247,7 +1750,7 @@ async function ask() {
 }
 
 function handleEvent(kind, data, ui) {
-  if (kind === 'start') { sessionId = data.session_id; return; }
+  if (kind === 'start') { setSession(data.session_id); return; }
 
   if (kind === 'status') {
     const label = {
@@ -1319,7 +1822,432 @@ q.addEventListener('input', () => {
   q.style.height = Math.min(q.scrollHeight, 140) + 'px';
 });
 document.querySelector('footer.composer').appendChild(jump);
-q.focus();
+
+// ---------------------------------------------------------------- session --
+// One session across every view: a product checked in the form can be fixed
+// in the Assistant and turned into a referral packet in Expert help.
+function setSession(id) {
+  sessionId = id;
+  document.getElementById('ref-go').disabled = false;
+  setText('ref-hint', 'Built from everything in this session so far.');
+}
+
+// ------------------------------------------------------------- navigation --
+const views = document.querySelectorAll('.view');
+const navBtns = document.querySelectorAll('.nav button');
+const loaders = {};
+const loaded = new Set();
+
+function show(name, updateHash) {
+  if (!document.querySelector(`.view[data-view="${name}"]`)) name = 'ask';
+  views.forEach(v => { v.hidden = v.dataset.view !== name; });
+  navBtns.forEach(b => {
+    if (b.dataset.view === name) b.setAttribute('aria-current', 'page');
+    else b.removeAttribute('aria-current');
+  });
+  if (updateHash !== false) {
+    history.replaceState(null, '', name === 'ask'
+      ? location.pathname + location.search : '#' + name);
+  }
+  if (loaders[name] && !loaded.has(name)) { loaded.add(name); loaders[name](); }
+  if (name === 'ask') q.focus();
+}
+navBtns.forEach(b => { b.onclick = () => show(b.dataset.view); });
+document.querySelectorAll('[data-goto]').forEach(a => {
+  a.onclick = e => { e.preventDefault(); show(a.dataset.goto); };
+});
+window.addEventListener('hashchange', () => show(location.hash.slice(1) || 'ask', false));
+
+// ------------------------------------------------------------------ theme --
+const THEMES = ['system', 'light', 'dark'];
+let theme = 'system';
+try { theme = localStorage.getItem('ayurlex-theme') || 'system'; } catch (e) { /* private mode */ }
+function applyTheme() {
+  if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.dataset.theme = theme;
+  setText('theme', 'Theme: ' + theme);
+}
+document.getElementById('theme').onclick = () => {
+  theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+  try { localStorage.setItem('ayurlex-theme', theme); } catch (e) { /* ignore */ }
+  applyTheme();
+};
+applyTheme();
+
+// ---------------------------------------------------------- check product --
+const form = document.getElementById('check-form');
+const ingList = document.getElementById('ing-list');
+
+function addIng(value) {
+  const row = el('div', 'ing-row');
+  const inp = el('input', 'in');
+  inp.value = value || '';
+  inp.placeholder = 'Ingredient name';
+  inp.setAttribute('aria-label', 'Ingredient');
+  const x = el('button', 'x', '×');
+  x.type = 'button';
+  x.setAttribute('aria-label', 'Remove ingredient');
+  x.onclick = () => { row.remove(); if (!ingList.children.length) addIng(); };
+  row.append(inp, x);
+  ingList.appendChild(row);
+  return inp;
+}
+function resetIngs(list) {
+  ingList.innerHTML = '';
+  (list && list.length ? list : ['', '']).forEach(v => addIng(v));
+}
+resetIngs();
+document.getElementById('ing-add').onclick = () => addIng().focus();
+form.addEventListener('reset', () => setTimeout(() => {
+  resetIngs();
+  document.getElementById('check-result').innerHTML = '';
+  setText('check-err', '');
+}));
+
+const lines = s => String(s || '').split('\n').map(x => x.trim()).filter(Boolean);
+
+function formulationFromForm() {
+  const f = new FormData(form);
+  const classical = f.get('classical');
+  return {
+    name: String(f.get('name') || '').trim() || 'Unnamed product',
+    ingredients: [...ingList.querySelectorAll('input')]
+      .map(i => i.value.trim()).filter(Boolean).map(n => ({raw_name: n})),
+    dosage_form: f.get('dosage_form'),
+    indications: lines(f.get('indications')),
+    marketing_claims: lines(f.get('claims')),
+    target_markets: f.getAll('market').length ? f.getAll('market') : ['IN'],
+    filing_intent: f.get('filing'),
+    process: {
+      summary: String(f.get('process') || '').trim(),
+      standardised_marker: String(f.get('marker') || '').trim() || null,
+      has_non_obvious_step: f.has('novel_step'),
+    },
+    evidence: {
+      has_documented_traditional_use: f.has('trad_use'),
+      has_clinical_data: f.has('clinical'),
+      has_synergy_data: f.has('synergy'),
+      nba_approval_obtained: f.has('nba'),
+      foreign_filing_permit: f.has('permit'),
+    },
+    applicant_is_indian_resident: f.has('resident'),
+    applicant_is_exempt_practitioner: f.has('vaidya'),
+    is_classical_formulation: classical === '' ? null : classical === 'true',
+  };
+}
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = document.getElementById('check-err');
+  err.textContent = '';
+  const body = formulationFromForm();
+  if (!body.ingredients.length) {
+    err.textContent = 'Add at least one ingredient.';
+    ingList.querySelector('input').focus();
+    return;
+  }
+  const go = document.getElementById('check-go');
+  go.disabled = true; go.textContent = 'Checking…';
+  const out = document.getElementById('check-result');
+  try {
+    const r = await fetch('/api/compile', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({formulation: body, session_id: sessionId}),
+    });
+    const d = await r.json();
+    if (!r.ok) { err.textContent = d.error || 'The check failed.'; return; }
+    setSession(d.session_id);
+    // The chat reply restates every finding as prose for a terminal reader.
+    // Here the structured blocks below carry all of it, so the prose goes.
+    d.text = '';
+    out.innerHTML = '';
+    addBot(d, out);
+    const next = el('div', 'actions');
+    next.style.marginTop = '14px';
+    const fix = el('button', 'btn', 'Apply the available fixes');
+    fix.type = 'button';
+    fix.onclick = () => { show('ask'); q.value = 'apply the fixes'; ask(); };
+    const help = el('button', 'btn', 'Prepare a referral packet');
+    help.type = 'button';
+    help.onclick = () => { show('help'); document.getElementById('ref-go').click(); };
+    next.append(fix, help);
+    out.appendChild(next);
+    out.scrollIntoView({behavior: 'smooth', block: 'start'});
+  } catch (e2) {
+    err.textContent = 'The server did not respond. Is it still running?';
+  } finally {
+    go.disabled = false; go.textContent = 'Check this product';
+  }
+});
+
+document.getElementById('check-example').onclick = () => {
+  form.reset();
+  setTimeout(() => {
+    const F = form.elements;
+    F.namedItem('name').value = 'Triphala Rasayana Churna';
+    form.querySelector('input[name="classical"][value="true"]').checked = true;
+    resetIngs(['आंवला', 'Kadukkai', 'Baheda']);
+    F.namedItem('claims').value = 'Cures diabetes in 30 days\nClinically proven for cancer prevention';
+    F.namedItem('indications').value = 'digestive support\ngeneral weakness';
+    F.namedItem('process').value = 'Sun-dried fruits, deseeded, pulverised and sieved through mesh 80.';
+    form.querySelectorAll('input[name="market"]').forEach(c => {
+      c.checked = ['IN', 'US', 'EP'].includes(c.value);
+    });
+  });
+};
+
+// ---------------------------------------------------------------- library --
+const sourcesP = fetch('/api/sources').then(r => r.json()).catch(() => []);
+sourcesP.then(list => setText('is-acts', list.length || '—'));
+let SOURCES = [];
+let libFilter = 'all';
+
+function srcLayer(s) {
+  if (!s.citable || s.rank >= 6) return 'BG';
+  return s.jurisdiction === 'IN' ? 'IN' : 'INTL';
+}
+
+function renderLib() {
+  const needle = document.getElementById('lib-q').value.trim().toLowerCase();
+  const box = document.getElementById('lib');
+  box.innerHTML = '';
+  const list = SOURCES.filter(s =>
+    (libFilter === 'all' || srcLayer(s) === libFilter) &&
+    (!needle || s.title.toLowerCase().includes(needle)));
+  if (!list.length) { box.appendChild(el('p', 'empty', 'No instrument matches.')); return; }
+  list.forEach(s => {
+    const L = srcLayer(s);
+    const card = el('button', 'src-card' + (L === 'INTL' ? ' intl' : L === 'BG' ? ' bg' : ''));
+    card.type = 'button';
+    card.appendChild(el('div', 't', s.title));
+    const meta = el('div', 'm');
+    meta.appendChild(el('span', 'badge ' + (L === 'IN' ? 'india' : L === 'INTL' ? 'intl' : ''),
+      L === 'IN' ? 'India' : L === 'INTL' ? s.jurisdiction : 'background'));
+    meta.appendChild(el('span', 'badge', s.type.toLowerCase()));
+    meta.appendChild(el('span', 'n', s.provisions.toLocaleString() + ' provisions'));
+    card.appendChild(meta);
+    card.onclick = () => openToc(s);
+    box.appendChild(card);
+  });
+}
+
+let TOC = [];
+function renderToc() {
+  const needle = document.getElementById('toc-filter').value.trim().toLowerCase();
+  const box = document.getElementById('toc');
+  box.innerHTML = '';
+  const rows = TOC.filter(r => !needle ||
+    (r.section + ' ' + r.heading).toLowerCase().includes(needle));
+  if (!rows.length) { box.appendChild(el('p', 'empty', 'No section matches.')); return; }
+  rows.forEach(r => {
+    const b = el('button');
+    b.type = 'button';
+    b.append(el('span', 's', r.section), el('span', null, r.heading || '(untitled)'),
+             el('span', 'p', 'p.' + r.page));
+    b.onclick = () => { lastCite = b; openSource(r.corpus_id, ''); };
+    box.appendChild(b);
+  });
+}
+
+async function openToc(s) {
+  const card = document.getElementById('toc-card');
+  card.hidden = false;
+  setText('toc-title', s.title);
+  setText('toc-meta', `${s.provisions.toLocaleString()} provisions · ${s.pdf}`);
+  document.getElementById('toc-filter').value = '';
+  const box = document.getElementById('toc');
+  box.innerHTML = '';
+  box.appendChild(el('p', 'empty', 'Loading…'));
+  card.closest('.pane').scrollTo({top: 0, behavior: 'smooth'});
+  try {
+    TOC = await (await fetch('/api/sources/' + encodeURIComponent(s.act_id))).json();
+    renderToc();
+  } catch (e) {
+    box.innerHTML = '';
+    box.appendChild(el('p', 'err', 'Could not load this instrument.'));
+  }
+}
+
+document.getElementById('toc-close').onclick = () => {
+  document.getElementById('toc-card').hidden = true;
+};
+document.getElementById('toc-filter').addEventListener('input', renderToc);
+document.getElementById('lib-q').addEventListener('input', renderLib);
+document.querySelectorAll('#lib-filter button').forEach(b => {
+  b.onclick = () => {
+    libFilter = b.dataset.f;
+    document.querySelectorAll('#lib-filter button').forEach(x =>
+      x.setAttribute('aria-pressed', String(x === b)));
+    renderLib();
+  };
+});
+// Indian law first, then the treaties, then background reading.
+const LAYER_ORDER = {IN: 0, INTL: 1, BG: 2};
+loaders.library = async () => {
+  SOURCES = (await sourcesP).slice().sort((a, b) =>
+    LAYER_ORDER[srcLayer(a)] - LAYER_ORDER[srcLayer(b)] || a.title.localeCompare(b.title));
+  renderLib();
+};
+
+// ------------------------------------------------------------- connections --
+const G_EXAMPLES = [
+  ['Nagoya Protocol', 'The Biological Diversity Act, 2002'],
+  ['TRIPS', 'The Patents Act, 1970'],
+];
+
+loaders.graph = async () => {
+  const tiles = document.getElementById('g-stats');
+  try {
+    const g = await (await fetch('/api/graph/stats')).json();
+    const nk = g.by_node_kind || {}, ek = g.by_edge_kind || {};
+    [[g.nodes, 'nodes'], [g.edges, 'links'], [nk.provision, 'provisions'],
+     [ek.CROSS_REFERS, 'cross-references'], [nk.concept, 'legal concepts']]
+      .forEach(([v, k]) => {
+        const t = el('div', 'tile');
+        t.append(el('div', 'v', (v || 0).toLocaleString()), el('div', 'k', k));
+        tiles.appendChild(t);
+      });
+  } catch (e) { /* the path finder still works without the counts */ }
+  const dl = document.getElementById('g-nodes');
+  (await sourcesP).forEach(s => {
+    const o = document.createElement('option');
+    o.value = s.title;
+    dl.appendChild(o);
+  });
+  const ex = document.getElementById('g-examples');
+  G_EXAMPLES.forEach(([a, b]) => {
+    const btn = el('button', null, a + ' → ' + b.replace(/^The /, ''));
+    btn.type = 'button';
+    btn.onclick = () => {
+      const F = document.getElementById('g-form').elements;
+      F.namedItem('src').value = a;
+      F.namedItem('dst').value = b;
+      findPath();
+    };
+    ex.appendChild(btn);
+  });
+};
+
+function walkNode(n) {
+  const isProv = !!n.corpus_id;
+  const box = el(isProv ? 'button' : 'div', 'node');
+  if (isProv) {
+    box.type = 'button';
+    box.onclick = () => { lastCite = box; openSource(n.corpus_id, ''); };
+  }
+  box.appendChild(el('span', 'badge k' + (n.jurisdiction && n.jurisdiction !== 'IN' ? ' intl' : ''),
+    n.kind));
+  box.appendChild(document.createTextNode(n.label));
+  if (isProv && n.pdf) box.appendChild(el('div', 'help', n.pdf + ' p.' + n.page));
+  return box;
+}
+
+async function findPath() {
+  const F = document.getElementById('g-form').elements;
+  const src = F.namedItem('src').value.trim(), dst = F.namedItem('dst').value.trim();
+  const out = document.getElementById('g-result');
+  out.innerHTML = '';
+  if (!src || !dst) { out.appendChild(el('p', 'err', 'Enter both ends of the connection.')); return; }
+  out.appendChild(el('p', 'empty', 'Walking the graph…'));
+  try {
+    const r = await fetch('/api/graph/path?' + new URLSearchParams({src, dst}));
+    const d = await r.json();
+    out.innerHTML = '';
+    const card = el('div', 'card');
+    card.style.marginTop = '14px';
+    if (d.error) { card.appendChild(el('p', 'err', d.error)); out.appendChild(card); return; }
+    if (!d.found) {
+      card.appendChild(el('h3', null, 'No connection'));
+      card.appendChild(el('p', 'lede', d.explain[0]));
+      out.appendChild(card);
+      return;
+    }
+    const head = el('h3', null, `${d.hops} step${d.hops === 1 ? '' : 's'}`);
+    card.appendChild(head);
+    if (d.walk.crosses_jurisdiction) {
+      card.appendChild(el('span', 'badge intl', 'crosses from treaty to Indian law'));
+    }
+    const ol = el('ol', 'walk');
+    const first = el('li');
+    first.appendChild(walkNode(d.walk.start));
+    ol.appendChild(first);
+    d.walk.hops.forEach(h => {
+      const li = el('li');
+      li.appendChild(el('div', 'edge', h.reads || h.edge.toLowerCase().replace(/_/g, ' ')));
+      li.appendChild(walkNode(h.node));
+      if (h.note) li.appendChild(el('div', 'note', h.note));
+      ol.appendChild(li);
+    });
+    card.appendChild(ol);
+    out.appendChild(card);
+  } catch (e) {
+    out.innerHTML = '';
+    out.appendChild(el('p', 'err', 'The server did not respond.'));
+  }
+}
+document.getElementById('g-form').addEventListener('submit', e => { e.preventDefault(); findPath(); });
+
+// ------------------------------------------------------------- expert help --
+const human = id => id.toLowerCase().replace(/_/g, ' ');
+
+loaders.help = async () => {
+  const box = document.getElementById('routes');
+  try {
+    const d = await (await fetch('/api/facilitators')).json();
+    box.innerHTML = '';
+    d.routes.forEach(r => {
+      const c = el('div', 'route');
+      c.appendChild(el('h4', null, r.label));
+      c.appendChild(el('p', null, r.mandate));
+      c.appendChild(el('div', 'basis', r.citation
+        ? `${r.citation} · ${r.pdf} p.${r.page}`
+        : (r.uncited || 'Administrative route: no statutory section establishes it.')));
+      if (r.site) {
+        const a = el('a', null, r.site);
+        a.href = 'https://' + r.site;
+        a.target = '_blank'; a.rel = 'noopener';
+        c.appendChild(a);
+      }
+      const tags = el('div', 'tags');
+      tags.appendChild(el('span', 'badge ' + (r.verified ? 'ok' : 'warn'),
+        r.verified ? 'verified against source' : 'unverified'));
+      (r.handles || []).forEach(h => tags.appendChild(el('span', 'badge', human(h))));
+      c.appendChild(tags);
+      box.appendChild(c);
+    });
+  } catch (e) {
+    box.innerHTML = '';
+    box.appendChild(el('p', 'err', 'Could not load the directory.'));
+  }
+};
+
+document.getElementById('ref-go').onclick = async () => {
+  const out = document.getElementById('ref-out');
+  out.innerHTML = '';
+  if (!sessionId) return;
+  try {
+    const r = await fetch('/api/escalate', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({session_id: sessionId,
+                            redact: document.getElementById('ref-redact').checked}),
+    });
+    const d = await r.json();
+    if (d.error) { out.appendChild(el('p', 'err', d.error)); return; }
+    const pre = el('pre', 'plain', d.text);
+    pre.style.marginTop = '16px';
+    const bar = el('div', 'copybar');
+    const cp = el('button', null, 'copy');
+    cp.type = 'button';
+    cp.onclick = () => navigator.clipboard.writeText(d.text).then(
+      () => { cp.textContent = 'copied'; }, () => { cp.textContent = 'select and copy'; });
+    bar.appendChild(cp);
+    out.append(pre, bar);
+  } catch (e) {
+    out.appendChild(el('p', 'err', 'The server did not respond.'));
+  }
+};
+
+show(location.hash.slice(1) || 'ask', false);
 </script>
 </body>
 </html>

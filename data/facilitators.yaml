@@ -1,0 +1,221 @@
+# SAMPARK — the human escalation directory.
+#
+# The assistant needs a path to escalate to a human IP facilitator. This file
+# is that path, expressed the way everything else in this system is expressed:
+# as reviewable data with a statutory basis, not as a hardcoded phone number.
+#
+# WHAT EACH ENTRY IS. An institutional ROUTE, not a person. "Take this to a
+# patent agent registered under Section 126" is a durable, checkable statement;
+# "call this number" goes stale in a month and cannot be verified by anybody
+# reading the repo. So each entry carries:
+#
+#   mandate     -- what this office actually does, in one sentence
+#   basis       -- the corpus id of the provision that establishes it, plus a
+#                  verbatim anchor. Verified at load exactly like a SUTRA rule:
+#                  an entry whose anchor has drifted is dropped and reported.
+#   site        -- the official domain, for a user who has to find the office
+#   contact     -- deliberately left as deployment configuration. A deploying
+#                  department fills in its own desk, officer and SLA; the
+#                  prototype must not invent one.
+#   handles     -- the escalation triggers this route answers
+#   ask_for     -- what the user should actually put in front of them, so the
+#                  referral is a working brief and not a complaint
+#
+# `background: true` marks a route whose corpus entry is reference material
+# rather than law (rank 6). It is still cited, but never as authority.
+# `uncited_authority` marks a route whose governing instrument is NOT in the
+# corpus — said out loud rather than papered over with a loosely related pin.
+
+- id: PATENT_AGENT
+  label: Registered patent agent
+  mandate: >-
+    Drafts and prosecutes the patent application, and is the person who decides
+    how a claim is framed. Every finding this assistant produces about
+    patentability is an input to that judgement, not a substitute for it.
+  basis: 'IN.PATENTS.1970::S126'
+  anchor: 'Qualifications for registration as patent agents'
+  site: 'ipindia.gov.in'
+  contact: 'configure at deployment'
+  handles: [BLOCKER_PRESENT, NO_FIX_AVAILABLE, PATENT_LANE, TKDL_ADVERSE_OUTCOME,
+            FOREIGN_FILING]
+  ask_for: >-
+    The C-BOM, the Section 3(p) and 3(e) findings with their citations, and the
+    evidence pack you actually hold — synergy data, clinical data, documented
+    traditional use. The agent's first question will be what distinguishes the
+    claim from the classical combination.
+
+- id: NBA
+  label: National Biodiversity Authority
+  mandate: >-
+    Grants the approval required before an intellectual property application on
+    an invention based on Indian biological resources, and determines the
+    benefit-sharing terms as a condition of that approval.
+  basis: 'IN.BDA.2002::S8'
+  anchor: 'head office of the National Biodiversity Authority shall be at Chennai'
+  site: 'nbaindia.org'
+  contact: 'configure at deployment'
+  handles: [ACCESS_LANE, BLOCKER_PRESENT, BENEFIT_SHARING]
+  ask_for: >-
+    The list of biological resources with their botanical names and stated
+    geographical origin, the intended intellectual property application, and
+    the commercial-utilisation plan. Section 6 approval is the gate; Section 21
+    benefit sharing is settled as part of it.
+
+- id: SBB
+  label: State Biodiversity Board of the State of access
+  mandate: >-
+    Receives the prior intimation required before a biological resource is
+    obtained for commercial utilisation or bio-survey within that State.
+  basis: 'IN.BDA.2002::S22'
+  anchor: 'Establishment of State Biodiversity Board'
+  site: 'nbaindia.org'
+  contact: 'configure at deployment'
+  handles: [ACCESS_LANE, PRIOR_INTIMATION]
+  ask_for: >-
+    Where each resource is collected or purchased, and in what quantity. Note
+    that Section 7 carries a proviso for local people and communities, growers
+    and cultivators, and vaids and hakims practising indigenous medicine — say
+    plainly which of those you are, because it may exempt you.
+
+- id: ASU_LICENSING_AUTHORITY
+  label: State Licensing Authority for ASU drugs
+  mandate: >-
+    Issues the manufacturing licence for Ayurvedic, Siddha and Unani drugs, on
+    Form 25-D, and is the office that decides in practice whether a product is
+    treated as a classical or a patent-or-proprietary medicine.
+  basis: 'IN.DC_RULES.1945::R154'
+  anchor: 'shall be issued in Form 25-D'
+  site: 'ayush.gov.in'
+  contact: 'configure at deployment'
+  handles: [REGULATORY_LANE, CLASSIFICATION_UNDECIDED, MANUFACTURING]
+  ask_for: >-
+    The formulation with proportions, the manufacturing method, the textual
+    reference relied on if you are claiming a classical formulation, and the
+    indications as they will appear on the label.
+
+- id: GI_REGISTRY
+  label: Geographical Indications Registry
+  mandate: >-
+    Registers geographical indications and authorised users. This is the route
+    where a regionally distinctive Ayurvedic product has protection available
+    that a patent cannot give it.
+  basis: 'IN.GI.1999::S5'
+  anchor: 'Geographical Indications Registry'
+  site: 'ipindia.gov.in'
+  contact: 'configure at deployment'
+  handles: [BRAND_LANE, GI_OPPORTUNITY]
+  ask_for: >-
+    The producer association or organisation that would hold the registration,
+    the defined geographical area, and the evidence that the quality or
+    reputation is attributable to that area.
+
+- id: TRADE_MARKS_REGISTRY
+  label: Trade Marks Registry
+  mandate: >-
+    Registers trade marks. Where the composition is unpatentable traditional
+    knowledge, the brand is usually the asset that can actually be protected.
+  basis: 'IN.TM.1999::S3'
+  anchor: 'Appointment of Registrar and other officers'
+  site: 'ipindia.gov.in'
+  contact: 'configure at deployment'
+  handles: [BRAND_LANE]
+  ask_for: >-
+    The mark as used, the classes of goods, and evidence of use. Expect the
+    Section 9 absolute-grounds test: a name that merely describes the herb or
+    the ailment is the common failure.
+
+- id: PPVFR_AUTHORITY
+  label: Protection of Plant Varieties and Farmers' Rights Authority
+  mandate: >-
+    Registers plant varieties and farmers' varieties — the route for a
+    cultivated medicinal plant line, which the patent system will not protect.
+  basis: 'IN.PPVFR.2001::S3'
+  anchor: >-
+    establish an Authority to be known as the Protection of Plant Varieties and
+    Farmers
+  site: 'plantauthority.gov.in'
+  contact: 'configure at deployment'
+  handles: [CULTIVAR, PLANT_VARIETY]
+  ask_for: >-
+    The variety's denomination, its distinctness, uniformity and stability
+    data, and the source of the parental material.
+
+- id: COPYRIGHT_OFFICE
+  label: Copyright Office
+  mandate: >-
+    Registers copyright. Relevant to compiled formularies, training material
+    and label artwork — not to the formulation itself.
+  basis: 'IN.COPYRIGHT.1957::S10'
+  anchor: 'Registrar and Deputy Registrar of Copyrights'
+  site: 'copyright.gov.in'
+  contact: 'configure at deployment'
+  handles: [COPYRIGHT_LANE]
+  ask_for: >-
+    The work as fixed, its authorship and the date of first publication.
+
+- id: DESIGNS_OFFICE
+  label: Designs Office (Controller General of Patents, Designs and Trade Marks)
+  mandate: >-
+    Registers the shape, configuration and ornamentation of an article — the
+    packaging and dispenser route, distinct from the composition.
+  basis: 'IN.DESIGNS.2000::S3'
+  anchor: 'Controller and other officers'
+  site: 'ipindia.gov.in'
+  contact: 'configure at deployment'
+  handles: [DESIGN_LANE]
+  ask_for: >-
+    Representations of the design and the article it is applied to. Publish
+    nothing before filing; novelty is destroyed by prior disclosure.
+
+- id: TKDL_ACCESS
+  label: TKDL access cell (CSIR / Ministry of Ayush)
+  mandate: >-
+    Holds the Traditional Knowledge Digital Library, the prior-art database
+    that patent offices consult against Ayurvedic claims. A search here tells
+    you what an examiner will find before you spend on drafting.
+  basis: 'REF.TKDL::P1'
+  background: true
+  site: 'tkdl.res.in'
+  contact: 'configure at deployment'
+  handles: [TKDL_ADVERSE_OUTCOME, PRIOR_ART]
+  ask_for: >-
+    The formulation in botanical names with parts used, and the indication.
+    Ask specifically whether the combination is already documented, because
+    that is the Section 3(p) question.
+
+- id: FSSAI
+  label: Food Safety and Standards Authority of India
+  mandate: >-
+    Regulates Ayurveda Aahara and nutraceutical products. A product positioned
+    as a food or supplement rather than a medicine is licensed here, not by the
+    drug licensing authority.
+  basis: 'IN.FSSA.2006::S4'
+  anchor: 'Establishment of Food Safety and Standards Authority of India'
+  site: 'fssai.gov.in'
+  contact: 'configure at deployment'
+  handles: [FOOD_POSITIONING, CLASSIFICATION_UNCITED]
+  ask_for: >-
+    The category you intend to be licensed under, the ingredient list against
+    the permitted schedules, and the exact label claims. Regulation 8 of the
+    Ayurveda Aahara Regulations is the one to read first: a label that claims
+    to prevent, treat or cure a disease takes the product out of this route
+    altogether and into the ASU drug licensing route.
+
+- id: AYUSH_IP_FACILITATION
+  label: Ministry of Ayush / AIIA IP facilitation desk
+  mandate: >-
+    The domain facilitator of last resort for an AYUSH innovator who does not
+    yet know which of the above they need. This is the route for a question the
+    assistant abstained on, and for a formulation whose regulatory category is
+    still open after the clarifying questions.
+  uncited_authority: >-
+    An administrative facilitation route rather than a statutory office; there
+    is no provision to cite, and the deploying department configures the desk.
+  site: 'ayush.gov.in'
+  contact: 'configure at deployment'
+  handles: [ABSTAINED, CLASSIFICATION_UNDECIDED, AMBIGUOUS_TAXON,
+            FOREIGN_JURISDICTION, USER_REQUESTED]
+  ask_for: >-
+    The transcript of what you asked and what the assistant could not answer.
+    The referral below states exactly which question had no authority in the
+    corpus and why, which is the part a facilitator needs first.

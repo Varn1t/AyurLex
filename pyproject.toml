@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ayurlex"
+version = "0.1.0"
+description = "Citation-grounded RAG assistant and deterministic compliance compiler for Ayurveda / AYUSH IP and regulatory law."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Varnit Kalra" }]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "pymupdf>=1.24",
+    "rapidfuzz>=3.0",
+    "numpy>=1.26",
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+ayurlex = "cli:main"
+
+# Install EDITABLE (pip install -e .): the code reads data/, web/, corpus/ and
+# sutra/rules/ relative to the source tree, so a copied install would lose them.
+[tool.setuptools]
+py-modules = ["cli", "server"]
+
+[tool.setuptools.packages.find]
+include = ["cbom*", "core*", "pramana*", "rag*", "sambandha*", "samhita*",
+           "sampark*", "setu*", "sutra*", "vargikarana*", "yukti*", "tests*"]

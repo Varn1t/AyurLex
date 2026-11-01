@@ -1,0 +1,16 @@
+.git
+corpus
+_drafts
+**/__pycache__
+.pytest_cache
+.venv
+venv
+*_last_context.md
+*_instructions.md
+.claude
+.codex
+.gemini
+.github
+docs/*.pdf
+docs/*.png
+docs/*.svg

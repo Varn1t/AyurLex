@@ -1,0 +1,45 @@
+{
+  "name": "Standardised Guduchi Extract (novel process)",
+  "ingredients": [
+    {
+      "raw_name": "गुडूची",
+      "part_used": "stem",
+      "proportion": {
+        "value": 1,
+        "unit": "part"
+      },
+      "is_cultivated": true
+    }
+  ],
+  "process": {
+    "summary": "Countercurrent supercritical CO2 extraction at 42 C with a novel two-stage entrainer switch.",
+    "has_non_obvious_step": true,
+    "novel_steps": [
+      "two-stage entrainer switch"
+    ],
+    "standardised_marker": "tinosporaside"
+  },
+  "dosage_form": "churna",
+  "indications": [
+    "immunomodulation"
+  ],
+  "marketing_claims": [],
+  "target_markets": [
+    "IN",
+    "US",
+    "EP"
+  ],
+  "filing_intent": "IN_FIRST",
+  "claim_types": [
+    "process"
+  ],
+  "applicant_type": "small_entity",
+  "applicant_is_indian_resident": true,
+  "evidence": {
+    "has_synergy_data": false,
+    "has_clinical_data": false,
+    "has_documented_traditional_use": true,
+    "nba_approval_obtained": false,
+    "foreign_filing_permit": false
+  }
+}

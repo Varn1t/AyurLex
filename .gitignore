@@ -1,0 +1,44 @@
+# AI tool config folders — never committed
+.claude/
+.codex/
+.gemini/
+.ai/
+.obsidian/
+.cursor/
+.windsurf/
+
+# Local drafts and generated artifacts
+_drafts/
+
+# Generated corpus (rebuild with: python samhita/ingest.py)
+corpus/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Built artifacts. All are regenerated from tracked source, so the file
+# on disk is never the authority:
+#   python scripts/build_documentation_pdf.py
+#   python scripts/build_architecture_diagrams.py
+# Committing them would also mean every rebuild shows as a large binary diff
+# nobody can review.
+/AyurLex-*.pdf
+docs/*.png
+docs/*.svg
+docs/*.pdf
+
+# Working documents, kept on disk and out of the repo. These are for the team
+# and for whichever AI tool is driving, not for anyone cloning the project:
+#   <Project>_instructions.md   the per-project agent addendum
+#   *-problem-statement-alignment.md, *-demo-script.md   internal working notes
+*_instructions.md
+*-problem-statement-alignment.md
+*-demo-script.md
+
+# Session handoff note for AI tools
+*_last_context.md

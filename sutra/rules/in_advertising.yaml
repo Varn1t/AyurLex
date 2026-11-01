@@ -1,0 +1,84 @@
+# SUTRA -- The Drugs and Magic Remedies (Objectionable Advertisements) Act, 1954
+#
+# The Schedule to this Act is a closed, enumerated list of diseases, disorders
+# and conditions. It is extracted from the same PDF into corpus/dmr_schedule.json
+# (54 entries) and screened against verbatim, so a claim hit reports the exact
+# scheduled entry it matched. No model judgement anywhere in this lane.
+
+- id: IN.DMR.S3.SCHEDULED_DISEASE_CLAIM
+  jurisdiction: IN
+  lane: BRAND
+  instrument: "The Drugs and Magic Remedies (Objectionable Advertisements) Act, 1954"
+  provision: "Section 3(d) read with the Schedule"
+  severity: BLOCKER
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: claims.has_scheduled_disease_claim
+        eq: true
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.DMR.1954::S3
+      provision: "Section 3(d)"
+      anchor: >-
+        the diagnosis, cure, mitigation, treatment or prevention of any disease,
+        disorder or condition specified in the Schedule
+  statement_template: >-
+    The marketing claim "{{ claims.first_hit.claim }}" refers to
+    "{{ claims.first_hit.scheduled_item }}", which is specified in the Schedule
+    to the Act. Section 3 prohibits taking any part in the publication of an
+    advertisement referring to a drug in terms which suggest, or are calculated
+    to lead to, its use for the diagnosis, cure, mitigation, treatment or
+    prevention of a scheduled condition.
+    {{ claims.scheduled_hits }} of {{ claims.count }} claim(s) hit the Schedule.
+  autofix:
+    - id: REWRITE_TO_NON_SCHEDULED_CLAIM
+      description: >-
+        Replace the disease claim with a permissible structure/function or
+        traditional-use statement that does not reference a scheduled condition,
+        and re-screen. The compiler lists every scheduled term matched so the
+        rewrite can be checked term by term.
+      sets_facts:
+        claims.has_scheduled_disease_claim: false
+      expected_effect: "IN.DMR.S3.SCHEDULED_DISEASE_CLAIM no longer fires"
+      emits_protocol: protocols/claim_rewrite_checklist.md
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/clean_claims.json
+      expect_fires: false
+
+- id: IN.DMR.S4.MISLEADING_CLAIM_RISK
+  jurisdiction: IN
+  lane: BRAND
+  instrument: "The Drugs and Magic Remedies (Objectionable Advertisements) Act, 1954"
+  provision: "Section 4"
+  severity: WARNING
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: claims.count
+        gte: 1
+      - fact: evidence.has_clinical_data
+        eq: false
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.DMR.1954::S4
+      provision: "Section 4(b)"
+      anchor: >-
+        directly or indirectly gives a false impression regarding the true
+        character of the drug
+  statement_template: >-
+    {{ claims.count }} marketing claim(s) are on record with no clinical data
+    supporting them. Section 4 of the Act prohibits an advertisement containing
+    matter which gives a false impression regarding the true character of the
+    drug, makes a false claim for it, or is otherwise false or misleading in any
+    material particular. Substantiation is what separates a permissible claim
+    from a misleading one; this is flagged for review rather than decided here.
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/synergy_evidenced.json
+      expect_fires: false

@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AyurLex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500&family=Noto+Sans+Telugu:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* ---------------------------------------------------------------------
+     AyurLex — visual system.
+
+     The subject is Indian statutory law, so the page is built as an
+     instrument rather than a chat window: a masthead and a composer bracket
+     one reading column of records, and each record carries its own authority
+     rail and footnote apparatus. Citations are numbered because a citation
+     order is real information; nothing else is numbered.
+
+     Neutrals are biased toward the accent rather than being flat grey, and
+     the semantic colours come from the subject — sindoor for a blocker,
+     haldi for a warning — so severity never reads as generic UI red/amber.
+     --------------------------------------------------------------------- */
+  :root {
+    /* Ground and ink. The greys carry a slight teal bias so they sit with
+       the accent instead of under it. */
+    --paper:#EEF1F0;
+    --surface:#FFFFFF;
+    --surface-2:#E6EBEA;
+    --read:#FBFCFC;             /* provision-reading ground in the dialog */
+    --ink:#101718;
+    --ink-soft:#384647;
+    --muted:#667573;
+    --line:#D2DAD8;
+    --line-soft:#E3E9E7;
+
+    /* Identity. */
+    --accent:#0B5257;
+    --accent-soft:#E1EDEC;
+    --accent-ink:#FFFFFF;
+
+    /* Semantic, drawn from the subject rather than from a UI palette. */
+    --blocker:#8E3225;          /* sindoor */
+    --warning:#8A5D0A;          /* haldi */
+    --opportunity:#14624A;
+    --info:#2A4E7E;
+    --tint-blocker:#FAEDEA;
+    --tint-warning:#FAF3E4;
+    --tint-opportunity:#E9F4EF;
+    --tint-info:#EBF0F8;
+    --highlight:rgba(197,151,58,.30);
+    --shadow-1:0 1px 2px rgba(16,23,24,.05);
+    --shadow-2:0 10px 30px -12px rgba(16,23,24,.28);
+    --r-lg:12px; --r-md:9px; --r-sm:5px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0B1012;
+      --surface:#121A1B;
+      --surface-2:#1A2324;
+      --read:#0E1516;
+      --ink:#E9EEED;
+      --ink-soft:#BFCAC8;
+      --muted:#879694;
+      --line:#26312F;
+      --line-soft:#1C2526;
+      --accent:#5FBFC3;
+      --accent-soft:#14302F;
+      --accent-ink:#04181A;
+      --blocker:#E78B7D;
+      --warning:#D5A55C;
+      --opportunity:#6BC69B;
+      --info:#93B5E3;
+      --tint-blocker:#251716;
+      --tint-warning:#241D12;
+      --tint-opportunity:#12241E;
+      --tint-info:#151D28;
+      --highlight:rgba(197,151,58,.28);
+      --shadow-1:0 1px 2px rgba(0,0,0,.4);
+      --shadow-2:0 10px 30px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0B1012; --surface:#121A1B; --surface-2:#1A2324; --read:#0E1516;
+    --ink:#E9EEED; --ink-soft:#BFCAC8; --muted:#879694;
+    --line:#26312F; --line-soft:#1C2526;
+    --accent:#5FBFC3; --accent-soft:#14302F; --accent-ink:#04181A;
+    --blocker:#E78B7D; --warning:#D5A55C; --opportunity:#6BC69B; --info:#93B5E3;
+    --tint-blocker:#251716; --tint-warning:#241D12;
+    --tint-opportunity:#12241E; --tint-info:#151D28;
+    --highlight:rgba(197,151,58,.28);
+    --shadow-1:0 1px 2px rgba(0,0,0,.4);
+    --shadow-2:0 10px 30px -12px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  /* The assistant answers in Hindi, Tamil and Telugu, and Plex Sans covers
+     none of those scripts -- without these faces every Indic answer renders
+     in whatever the operating system happens to have. Per-glyph fallback
+     picks the right face out of this stack automatically. */
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font:15px/1.65 "IBM Plex Sans","IBM Plex Sans Devanagari",
+         "Noto Sans Tamil","Noto Sans Telugu",ui-sans-serif,-apple-system,
+         "Segoe UI",sans-serif;
+    display:flex; flex-direction:column;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection { background:var(--accent-soft); color:var(--ink); }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* ------------------------------------------------------------ masthead -- */
+  header {
+    flex:0 0 auto; background:var(--surface);
+    border-bottom:1px solid var(--line);
+    display:grid; grid-template-columns:auto 1fr auto;
+    align-items:center; gap:0 16px;
+    padding:13px 22px;
+  }
+  /* A seal rather than a logo: this is an instrument, and the monogram is
+     the only ornament on the page. */
+  .seal {
+    width:38px; height:38px; flex:0 0 auto; display:grid; place-items:center;
+    border:1.5px solid var(--accent); border-radius:3px;
+    color:var(--accent); background:var(--accent-soft);
+    font-family:Spectral,Georgia,serif; font-weight:700; font-size:15px;
+    letter-spacing:.02em;
+  }
+  .masthead { min-width:0; }
+  .masthead h1 {
+    font-family:Spectral,Georgia,serif; font-size:20px; font-weight:600;
+    letter-spacing:-.012em; margin:0; line-height:1.15;
+    text-wrap:balance;
+  }
+  .eyebrow {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
+    margin:0 0 3px;
+  }
+  header .tag {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+    color:var(--muted); display:block; margin-top:2px;
+  }
+  /* The corpus figures read as a seal strip: monospace, tabular, right-set. */
+  header .status {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+    line-height:1.5; color:var(--muted); text-align:right;
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+    padding-left:16px; border-left:1px solid var(--line-soft);
+  }
+  .dot {
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--opportunity); margin-right:6px; vertical-align:1px;
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--opportunity) 18%, transparent);
+  }
+  header .status.bad .dot {
+    background:var(--blocker);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--blocker) 18%, transparent);
+  }
+
+  main { flex:1 1 auto; overflow-y:auto; scroll-behavior:smooth; }
+  .wrap { max-width:820px; margin:0 auto; padding:26px 22px 40px; }
+
+  /* --------------------------------------------------------- empty state -- */
+  /* Two modes, because there really are two intents. The panels are the
+     structure, not decoration. */
+  .intro { margin-bottom:26px; }
+  .intro > p {
+    margin:0 0 18px; max-width:62ch; font-size:15px; color:var(--ink-soft);
+  }
+  .modes {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line);
+    border-radius:var(--r-md); overflow:hidden; margin-bottom:22px;
+  }
+  .mode { background:var(--surface); padding:15px 17px; }
+  .mode h2 {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+    margin:0 0 7px; font-weight:600;
+  }
+  .mode p { margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+  .mode em { color:var(--ink); font-style:italic; }
+
+  .intro .chips-label {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    letter-spacing:.13em; text-transform:uppercase; color:var(--muted);
+    margin:0 0 9px; max-width:none;
+  }
+  .chips { display:flex; flex-wrap:wrap; gap:7px; }
+  .chip {
+    font:inherit; font-size:13px; line-height:1.35; text-align:left;
+    padding:8px 13px; border:1px solid var(--line); background:var(--surface);
+    border-radius:var(--r-sm); cursor:pointer; color:var(--ink-soft);
+    max-width:100%; transition:border-color .12s, color .12s, background .12s;
+  }
+  .chip:hover {
+    border-color:var(--accent); color:var(--accent);
+    background:var(--accent-soft);
+  }
+
+  /* ------------------------------------------------------------- records -- */
+  .msg { margin:22px 0; }
+  .msg.user { display:flex; justify-content:flex-end; }
+  .msg.user .bubble {
+    background:var(--accent); color:var(--accent-ink);
+    border-radius:var(--r-md) var(--r-md) 2px var(--r-md);
+    padding:10px 15px; max-width:76%; box-shadow:var(--shadow-1);
+  }
+  .msg.user .bubble p { margin:0; }
+
+  /* A bot answer is a record: hairline top rule, byline, authority rail. No
+     bubble — the rail is what carries the identity. */
+  .msg.bot .bubble {
+    background:var(--surface); border:1px solid var(--line);
+    border-left:3px solid var(--accent);
+    border-radius:0 var(--r-md) var(--r-md) 0;
+    padding:16px 19px; box-shadow:var(--shadow-1);
+  }
+  /* The rail is not decoration: it takes its colour from what the record
+     actually is, so an international answer and a refusal are distinguishable
+     from across the room, before a word is read. */
+  .msg.bot .bubble:has(.layer.intl) { border-left-color:var(--info); }
+  .msg.bot .bubble:has(.pill.abstain) { border-left-color:var(--warning); }
+
+  .who {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+    margin-bottom:9px; padding-bottom:8px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .bubble p { margin:0 0 11px; white-space:pre-wrap; }
+  .bubble p:last-child { margin-bottom:0; }
+
+  /* A referral packet, a graph walk and an orchestrated answer are all
+     LAID OUT documents — indentation carries meaning in each of them, and
+     splitting them into <p> on blank lines throws that away. They render as
+     preformatted text, which is also what the user is going to copy. */
+  .plain {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11.5px;
+    line-height:1.62; white-space:pre-wrap; word-break:break-word;
+    margin:0; color:var(--ink);
+  }
+  .copybar {
+    display:flex; justify-content:flex-end; margin-top:10px;
+  }
+  .copybar button {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    letter-spacing:.1em; text-transform:uppercase; cursor:pointer;
+    background:transparent; color:var(--muted);
+    border:1px solid var(--line); border-radius:3px; padding:5px 10px;
+  }
+  .copybar button:hover { color:var(--ink); border-color:var(--accent); }
+
+  /* The orchestrator's plan and trace. Collapsed by default — an agent has to
+     be inspectable, but it should not shout its plumbing at every reader. */
+  .trace { margin-top:14px; border-top:1px solid var(--line-soft);
+           padding-top:11px; }
+  .trace summary {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
+    cursor:pointer;
+  }
+  .trace ol { margin:10px 0 0; padding-left:20px; }
+  .trace li { margin-bottom:9px; font-size:12px; }
+  .trace .tool {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+    letter-spacing:.06em; text-transform:uppercase;
+  }
+  .trace .why { color:var(--muted); font-size:11.5px; display:block;
+                margin-top:2px; }
+
+  /* ---------------------------------------------------------------- meta -- */
+  .meta {
+    display:flex; gap:7px; flex-wrap:wrap; margin-top:14px;
+    padding-top:11px; border-top:1px solid var(--line-soft);
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+  }
+  .pill {
+    border:1px solid var(--line); border-radius:3px; padding:3px 8px;
+    color:var(--muted); letter-spacing:.04em;
+    font-variant-numeric:tabular-nums;
+  }
+  .pill.abstain {
+    color:var(--warning); border-color:var(--warning);
+    background:var(--tint-warning);
+  }
+
+  .taxa { margin-top:11px; font-size:12.5px; color:var(--muted); }
+  .taxa b { color:var(--ink-soft); font-weight:500; font-style:italic; }
+
+  /* --------------------------------------------- the footnote apparatus -- */
+  /* Citations are the product, so they get real structure: a label, numbered
+     markers, and the source line set as data. */
+  .cites {
+    margin-top:15px; padding-top:12px; border-top:1px solid var(--line);
+    counter-reset:cite;
+  }
+  .cite-head-label {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+    padding-bottom:7px;
+  }
+  .cite {
+    display:grid; grid-template-columns:auto 1fr; gap:2px 10px;
+    width:100%; text-align:left; background:none; border:0;
+    border-bottom:1px solid var(--line-soft); padding:9px 0;
+    cursor:pointer; font:inherit; color:var(--ink-soft);
+  }
+  .cite:last-child { border-bottom:0; }
+  .cite::before {
+    counter-increment:cite; content:"[" counter(cite) "]";
+    grid-row:1 / span 3;
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+    color:var(--accent); padding-top:2px;
+    font-variant-numeric:tabular-nums;
+  }
+  .cite:hover { background:var(--accent-soft); }
+  .cite:hover .cite-title { color:var(--accent); }
+  .cite-title { font-size:13.5px; font-weight:500; color:var(--ink); }
+  .cite-src {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+    color:var(--muted); word-break:break-word;
+  }
+
+  /* --------------------------------------------------------- the layers -- */
+  /* India and international must never look alike. */
+  .layer {
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px;
+    letter-spacing:.12em; text-transform:uppercase; padding:4px 10px;
+    border-radius:3px; margin-bottom:12px; font-weight:500;
+    border:1px solid var(--opportunity); color:var(--opportunity);
+    background:var(--tint-opportunity);
+  }
+  .layer::before {
+    content:""; width:5px; height:5px; border-radius:1px;
+    background:currentColor;
+  }
+  .layer.intl {
+    border-color:var(--info); color:var(--info); background:var(--tint-info);
+  }
+  .juris {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9px;
+    letter-spacing:.08em; border:1px solid var(--info); color:var(--info);
+    border-radius:2px; padding:1px 5px; margin-left:8px; vertical-align:2px;
+    font-weight:500;
+  }
+  .force {
+    font-size:11.5px; color:var(--muted); margin-top:5px;
+    padding-left:11px; border-left:2px solid var(--line);
+    grid-column:2; font-style:italic;
+  }
+
+  /* ------------------------------------------------------ classification -- */
+  /* The category decides the IP posture, so it is a finding in its own right
+     and gets the most structured block on the page. */
+  .klass {
+    margin-top:16px; border:1px solid var(--line);
+    border-top:3px solid var(--info);
+    border-radius:0 0 var(--r-md) var(--r-md);
+    padding:15px 17px; background:var(--surface);
+  }
+  .klass.ask { border-top-color:var(--warning); background:var(--tint-warning); }
+  .klass h4 {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+    font-weight:600; margin:0 0 7px;
+  }
+  .klass .cat {
+    font-family:Spectral,Georgia,serif; font-size:20px; font-weight:600;
+    line-height:1.2; margin-bottom:4px; color:var(--ink);
+    text-wrap:balance;
+  }
+  .klass .why { font-size:12.5px; color:var(--muted); margin-bottom:12px; }
+  .klass dl {
+    margin:0; display:grid; grid-template-columns:auto 1fr; gap:9px 14px;
+    padding-top:12px; border-top:1px solid var(--line-soft);
+  }
+  .klass dt {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+    padding-top:3px; white-space:nowrap; font-weight:600;
+  }
+  .klass dd { margin:0; font-size:13px; color:var(--ink-soft); line-height:1.6; }
+  .klass ol {
+    margin:8px 0 0; padding-left:0; list-style:none; counter-reset:q;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .klass li {
+    font-size:14px; color:var(--ink); padding-left:26px; position:relative;
+    line-height:1.55;
+  }
+  .klass li::before {
+    counter-increment:q; content:counter(q);
+    position:absolute; left:0; top:1px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    width:17px; height:17px; border-radius:50%; display:grid;
+    place-items:center; background:var(--warning); color:var(--surface);
+    font-weight:600;
+  }
+  .klass .note {
+    margin-top:12px; font-size:12px; color:var(--warning);
+    border-top:1px dashed var(--line); padding-top:9px;
+  }
+  .klass .cites { border-top-color:var(--line-soft); }
+
+  .guard {
+    margin-top:13px; font-size:12px; color:var(--muted);
+    border-top:1px dashed var(--line); padding-top:9px;
+  }
+
+  /* -------------------------------------------------------------- tiles -- */
+  /* Big figures are justified here: the counts are the point of a compile. */
+  .tiles {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line);
+    border-radius:var(--r-md); overflow:hidden; margin:16px 0 4px;
+  }
+  .tile { background:var(--surface); padding:11px 13px 10px; }
+  .tile .v {
+    font-family:Spectral,Georgia,serif; font-size:27px; font-weight:600;
+    line-height:1; font-variant-numeric:tabular-nums;
+  }
+  .tile .k {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
+    margin-top:7px;
+  }
+  .tile.b { background:var(--tint-blocker); }
+  .tile.b .v { color:var(--blocker); }
+  .tile.w { background:var(--tint-warning); }
+  .tile.w .v { color:var(--warning); }
+  .tile.o { background:var(--tint-opportunity); }
+  .tile.o .v { color:var(--opportunity); }
+  .tile.i { background:var(--tint-info); }
+  .tile.i .v { color:var(--info); }
+  /* A muted zero on a plain ground reads as "clean", not as an alarm. */
+  .tile.zero { background:var(--surface); }
+  .tile.zero .v { color:var(--muted); }
+
+  /* ----------------------------------------------------------- findings -- */
+  .findings { margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+  /* Severity is spent by role rather than stamped uniformly: a blocker gets a
+     tinted ground and a filled chip, an INFO gets a hairline and nothing
+     more. */
+  .finding {
+    border:1px solid var(--line); border-left:3px solid var(--line);
+    border-radius:0 var(--r-md) var(--r-md) 0; padding:12px 15px;
+    background:var(--surface);
+  }
+  .finding.BLOCKER {
+    border-left-color:var(--blocker); background:var(--tint-blocker);
+  }
+  .finding.WARNING { border-left-color:var(--warning); }
+  .finding.OPPORTUNITY { border-left-color:var(--opportunity); }
+  .finding.INFO { border-left-color:var(--info); }
+  .f-head {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9px;
+    letter-spacing:.12em; text-transform:uppercase;
+    display:flex; gap:9px; flex-wrap:wrap; align-items:center;
+  }
+  .sev {
+    font-weight:600; padding:2.5px 7px; border-radius:2px;
+    background:var(--surface-2); color:var(--ink-soft);
+  }
+  .finding.BLOCKER .sev { background:var(--blocker); color:var(--surface); }
+  .finding.WARNING .sev { color:var(--warning); background:var(--tint-warning); }
+  .finding.OPPORTUNITY .sev {
+    color:var(--opportunity); background:var(--tint-opportunity);
+  }
+  .finding.INFO .sev { color:var(--info); background:var(--tint-info); }
+  .f-lane { color:var(--muted); }
+  .f-prov {
+    font-size:13.5px; font-weight:600; margin:9px 0 5px; color:var(--ink);
+  }
+  .f-text { font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+  .f-fix {
+    margin-top:10px; font-size:12.5px; color:var(--ink-soft);
+    border-top:1px dashed var(--line); padding-top:8px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  .f-fix.no { opacity:.55; }
+  .finding .cites { border-top-color:var(--line-soft); }
+
+  /* --------------------------------------------------------- data tables -- */
+  .sect { margin-top:20px; }
+  .sect > h4 {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+    font-weight:600; margin:0 0 10px; padding-bottom:7px;
+    border-bottom:1px solid var(--line);
+  }
+  .scroll-x { overflow-x:auto; }
+  table.grid {
+    width:100%; border-collapse:collapse; font-size:12.5px;
+    font-variant-numeric:tabular-nums;
+  }
+  table.grid th {
+    text-align:left; font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted); font-weight:600; padding:0 14px 7px 0;
+    white-space:nowrap;
+  }
+  table.grid td {
+    padding:9px 14px 9px 0; border-top:1px solid var(--line-soft);
+    color:var(--ink-soft); vertical-align:top; line-height:1.55;
+  }
+  table.grid tbody tr:hover td { background:var(--accent-soft); }
+  table.grid td.mono {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+    white-space:nowrap; color:var(--ink);
+  }
+  .st {
+    display:inline-block; font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:9px; letter-spacing:.08em; text-transform:uppercase;
+    border:1px solid var(--line); border-radius:2px; padding:2.5px 7px;
+    white-space:nowrap; color:var(--muted); font-weight:600;
+  }
+  .st.no {
+    color:var(--blocker); border-color:var(--blocker);
+    background:var(--tint-blocker);
+  }
+  .st.yes {
+    color:var(--opportunity); border-color:var(--opportunity);
+    background:var(--tint-opportunity);
+  }
+  .st.maybe {
+    color:var(--warning); border-color:var(--warning);
+    background:var(--tint-warning);
+  }
+
+  /* ----------------------------------------------------------- composer -- */
+  footer.composer {
+    flex:0 0 auto; border-top:1px solid var(--line); background:var(--surface);
+    padding:15px 22px 13px; position:relative;
+  }
+  .composer-inner {
+    max-width:820px; margin:0 auto; display:flex; gap:10px;
+    align-items:flex-end;
+  }
+  #q {
+    flex:1; font:inherit; padding:12px 15px; border-radius:var(--r-md);
+    border:1px solid var(--line); background:var(--paper); color:var(--ink);
+    resize:none; max-height:150px; line-height:1.55;
+    transition:border-color .12s, box-shadow .12s;
+  }
+  #q::placeholder { color:var(--muted); }
+  #q:focus {
+    outline:none; border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  button.send {
+    font:inherit; font-weight:600; font-size:14px; padding:0 22px;
+    height:45px; border-radius:var(--r-md); flex:0 0 auto;
+    border:1px solid var(--accent); background:var(--accent);
+    color:var(--accent-ink); cursor:pointer;
+    transition:filter .12s;
+  }
+  button.send:hover:not(:disabled) { filter:brightness(1.15); }
+  button.send:disabled { opacity:.45; cursor:default; }
+  .composer-foot {
+    max-width:820px; margin:10px auto 0;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:20px;
+  }
+  .disclaimer {
+    margin:0; font-size:11px; color:var(--muted); max-width:68ch;
+    line-height:1.55;
+  }
+  .disclaimer strong { color:var(--ink); font-weight:600; }
+  .hint {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+    color:var(--muted); text-align:right; margin:0; white-space:nowrap;
+    flex:0 0 auto;
+  }
+
+  /* ------------------------------------------------------ source dialog -- */
+  /* Reads as a provision extract, because that is what it is. */
+  dialog {
+    border:1px solid var(--line); border-radius:var(--r-lg);
+    background:var(--surface); color:var(--ink);
+    max-width:760px; width:92%; padding:0; box-shadow:var(--shadow-2);
+  }
+  dialog::backdrop { background:rgba(8,14,15,.55); backdrop-filter:blur(2px); }
+  .dlg-head {
+    padding:17px 21px; border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:16px; background:var(--surface);
+    border-radius:var(--r-lg) var(--r-lg) 0 0;
+  }
+  .dlg-head h3 {
+    margin:0 0 5px; font-family:Spectral,Georgia,serif; font-size:18px;
+    font-weight:600; line-height:1.25; text-wrap:balance;
+  }
+  .dlg-head .src {
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+    color:var(--muted); line-height:1.6;
+  }
+  .dlg-body {
+    padding:20px 21px; max-height:60vh; overflow-y:auto;
+    white-space:pre-wrap; font-size:14px; line-height:1.75;
+    background:var(--read); color:var(--ink-soft);
+    border-radius:0 0 var(--r-lg) var(--r-lg);
+  }
+  .dlg-close {
+    background:none; border:1px solid var(--line); border-radius:var(--r-sm);
+    color:var(--muted); cursor:pointer; font:inherit; font-size:13px;
+    padding:5px 12px; flex:0 0 auto;
+  }
+  .dlg-close:hover { border-color:var(--accent); color:var(--accent); }
+  mark {
+    background:var(--highlight); color:inherit;
+    padding:1px 0; border-radius:2px;
+    box-shadow:0 1px 0 color-mix(in srgb, var(--warning) 45%, transparent);
+  }
+
+  /* ------------------------------------------------------------ waiting -- */
+  .thinking {
+    display:flex; align-items:center; gap:11px;
+    color:var(--muted); font-size:13px; font-style:italic;
+  }
+  .thinking .bars { display:inline-flex; gap:3px; flex:0 0 auto; }
+  .thinking .bars i {
+    width:3px; height:13px; border-radius:1px; background:var(--accent);
+    opacity:.3;
+  }
+  .thinking .elapsed {
+    margin-left:auto; font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:10.5px; font-style:normal; font-variant-numeric:tabular-nums;
+    opacity:.85; flex:0 0 auto;
+  }
+  .draft {
+    white-space:pre-wrap; opacity:.7; border-left:2px solid var(--line);
+    padding-left:12px; margin-top:12px; font-size:14.5px;
+  }
+  .drops {
+    margin-top:12px; font-size:12px; color:var(--warning);
+    border-top:1px dashed var(--line); padding-top:9px;
+  }
+
+  .jump {
+    position:absolute; top:-48px; right:22px; z-index:5;
+    font:inherit; font-size:12px; padding:7px 14px; border-radius:999px;
+    border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-soft); cursor:pointer; box-shadow:var(--shadow-2);
+  }
+  .jump:hover { border-color:var(--accent); color:var(--accent); }
+
+  @media (max-width:640px) {
+    header { grid-template-columns:auto 1fr; padding:12px 16px; }
+    header .status {
+      grid-column:1 / -1; text-align:left; padding:9px 0 0;
+      border-left:0; border-top:1px solid var(--line-soft); margin-top:9px;
+    }
+    .wrap { padding:20px 16px 32px; }
+    footer.composer { padding:12px 16px 11px; }
+    .composer-foot { flex-direction:column; gap:7px; }
+    .hint { text-align:left; }
+    .msg.user .bubble { max-width:88%; }
+  }
+
+  @media (prefers-reduced-motion:no-preference) {
+    .msg { animation:rise .2s ease-out; }
+    @keyframes rise { from { opacity:0; transform:translateY(6px); } }
+    .thinking .bars i { animation:pulse 1.1s ease-in-out infinite; }
+    .thinking .bars i:nth-child(2) { animation-delay:.15s; }
+    .thinking .bars i:nth-child(3) { animation-delay:.3s; }
+    @keyframes pulse {
+      0%,100% { opacity:.25; transform:scaleY(.55); }
+      50%     { opacity:1;   transform:scaleY(1); }
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="seal" aria-hidden="true">AL</div>
+  <div class="masthead">
+    <p class="eyebrow">AYUSH IP &amp; regulatory compliance</p>
+    <h1>AyurLex</h1>
+    <span class="tag">grounded IP &amp; regulatory guidance for Ayurveda</span>
+  </div>
+  <span class="status" id="status"><span class="dot"></span>loading…</span>
+</header>
+
+<main>
+  <div class="wrap" id="thread" aria-live="polite" aria-busy="false">
+    <div class="intro" id="intro">
+      <p>Indian IP and AYUSH regulatory law, answered from primary sources —
+      statutes, rules and treaties — in English, Hindi, Tamil or Telugu. Every
+      answer quotes the provision it rests on, and no answer is given where the
+      corpus holds no authority.</p>
+
+      <div class="modes">
+        <div class="mode">
+          <h2>Ask</h2>
+          <p>A question gets an answer tied to the provision behind it. Click
+          any source to read the original text at its own page, with the
+          sentence the answer leaned on highlighted.</p>
+        </div>
+        <div class="mode">
+          <h2>Compile</h2>
+          <p>Describe a formulation and it is <em>compiled</em> instead of
+          answered: the regulatory category first, then blockers, obligations
+          and the fixes that clear them — from the rules, with no model
+          involved.</p>
+        </div>
+      </div>
+
+      <p class="chips-label">Start with one of these</p>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="composer">
+  <div class="composer-inner">
+    <textarea id="q" rows="1" aria-label="Your question or formulation"
+      placeholder="Ask a question, or describe your formulation…"></textarea>
+    <button class="send" id="send">Send</button>
+  </div>
+  <div class="composer-foot">
+    <p class="disclaimer"><strong>Not legal advice.</strong> Informational
+    compliance analysis from primary statutory sources; it does not replace a
+    registered patent agent or advocate. Nothing you type is written to disk.</p>
+    <p class="hint">Enter to send · Shift+Enter for a new line</p>
+  </div>
+</footer>
+
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <div class="dlg-head">
+    <div>
+      <h3 id="dlg-title"></h3>
+      <div class="src" id="dlg-src"></div>
+    </div>
+    <button class="dlg-close" id="dlg-close">Close</button>
+  </div>
+  <div class="dlg-body" id="dlg-body"></div>
+</dialog>
+
+<script>
+const SUGGESTIONS = [
+  "Can I patent a traditional ayurvedic formulation?",
+  'my churna contains amla, haritaki and bibhitaki and I market it as ' +
+    '“cures diabetes”',
+  "my product is a standardised extract with 5% withanolides from " +
+    "ashwagandha for treating arthritis",
+  "what does the Nagoya Protocol require for benefit sharing",
+  "I am a vaidya, do I need to inform the state biodiversity board",
+  "क्या मैं गिलोय का पेटेंट करा सकता हूँ",
+  "what is the EPO opposition period",
+  "how does the Nagoya Protocol connect to the Biological Diversity Act",
+  "what does the Nagoya Protocol require and what must I do in India " +
+    "under the Biological Diversity Act",
+];
+
+const thread = document.getElementById('thread');
+const q = document.getElementById('q');
+const send = document.getElementById('send');
+const dlg = document.getElementById('dlg');
+let sessionId = null;
+let busy = false;
+
+const chips = document.getElementById('chips');
+SUGGESTIONS.forEach(s => {
+  const b = document.createElement('button');
+  b.className = 'chip'; b.type = 'button'; b.textContent = s;
+  b.onclick = () => { q.value = s; ask(); };
+  chips.appendChild(b);
+});
+
+try {
+fetch('/api/health').then(r => r.json()).then(h => {
+  const st = document.getElementById('status');
+  const model = h.ollama && h.ollama.running ? h.ollama.model : 'extractive only';
+  // Say plainly whether anything typed here can leave the machine. Bhashini is
+  // the only path that sends text off-box, it is off unless someone configured
+  // it, and a user deciding whether to describe a proprietary formulation is
+  // entitled to know which of the two states they are in before they type.
+  const reach = (h.bhashini && h.bhashini.enabled)
+    ? 'translation via Bhashini' : 'runs offline';
+  st.innerHTML =
+    `<span class="dot"></span>${h.provisions} provisions · ${h.verified}/${h.rules} rules verified` +
+    `<br>${esc(model)} · ${esc(reach)}`;
+  if (!(h.ollama && h.ollama.running)) st.classList.add('bad');
+}).catch(() => {
+  const st = document.getElementById('status');
+  st.classList.add('bad');
+  st.innerHTML = '<span class="dot"></span>server unreachable';
+});
+} catch (e) { /* cosmetic only -- never block the composer below */ }
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function addUser(text) {
+  const m = el('div', 'msg user');
+  const b = el('div', 'bubble');
+  b.appendChild(el('p', null, text));
+  m.appendChild(b);
+  thread.appendChild(m);
+  scroll();
+}
+
+// Intents whose reply is a laid-out document rather than prose. Indentation
+// carries meaning in all three, and the referral is meant to be copied whole.
+const LAID_OUT = new Set(['ESCALATE', 'GRAPH', 'ORCHESTRATE']);
+
+function traceBlock(t) {
+  // The orchestrator's plan and what each step actually did. An agent whose
+  // steps the user cannot inspect is one they have to take on trust, and this
+  // system's whole argument is that nothing has to be taken on trust.
+  const d = document.createElement('details');
+  d.className = 'trace';
+  const s = document.createElement('summary');
+  s.textContent = `plan · ${t.plan.length} step(s) · ${t.elapsed}s`;
+  d.appendChild(s);
+  const ol = document.createElement('ol');
+  t.plan.forEach((p, i) => {
+    const r = t.steps[i] || {};
+    const li = document.createElement('li');
+    const bits = [];
+    if (r.layer) bits.push(r.layer);
+    if (r.groundedness !== null && r.groundedness !== undefined) {
+      bits.push('g ' + Number(r.groundedness).toFixed(2));
+    }
+    if (r.abstained) bits.push('abstained');
+    if (r.elapsed !== undefined) bits.push(r.elapsed + 's');
+    li.innerHTML = `<span class="tool">${esc(p.tool)}</span>` +
+      (bits.length ? ' · ' + esc(bits.join(' · ')) : '') +
+      `<span class="why">${esc(p.why)}</span>` +
+      (r.backend ? `<span class="why">${esc(r.backend)}</span>` : '');
+    ol.appendChild(li);
+  });
+  d.appendChild(ol);
+  return d;
+}
+
+function addBot(data) {
+  const m = el('div', 'msg bot');
+  const b = el('div', 'bubble');
+  b.appendChild(el('div', 'who', 'ayurlex · ' + data.intent));
+  if (data.layer) b.appendChild(layerBadge(data.layer));
+
+  // Laid-out replies keep their layout. See the .plain rule for why.
+  if (LAID_OUT.has(data.intent)) {
+    const pre = el('pre', 'plain', data.text);
+    b.appendChild(pre);
+    const bar = el('div', 'copybar');
+    const cp = document.createElement('button');
+    cp.type = 'button';
+    cp.textContent = 'copy';
+    cp.onclick = () => {
+      navigator.clipboard.writeText(data.text).then(
+        () => { cp.textContent = 'copied'; },
+        () => { cp.textContent = 'select and copy'; });
+    };
+    bar.appendChild(cp);
+    b.appendChild(bar);
+  } else {
+    data.text.split('\n\n').forEach(par => {
+      if (par.trim()) b.appendChild(el('p', null, par));
+    });
+  }
+
+  if (data.trace) b.appendChild(traceBlock(data.trace));
+
+  if (data.taxa && data.taxa.length) {
+    const t = el('div', 'taxa');
+    t.innerHTML = 'resolved: ' + data.taxa
+      .map(x => `<b>${esc(x.input)}</b> → ${esc(x.taxon)}`).join(' · ');
+    b.appendChild(t);
+  }
+
+  if (data.classification) b.appendChild(classBlock(data.classification));
+
+  if (data.summary) {
+    const tiles = el('div', 'tiles');
+    const S = data.summary;
+    [['blockers', S.blockers, 'b'], ['warnings', S.warnings, 'w'],
+     ['opportunity', S.opportunities, 'o'], ['obligations', S.obligations, 'i']]
+      .forEach(([k, v, cls]) => {
+        const t = el('div', 'tile ' + cls + (v ? '' : ' zero'));
+        t.appendChild(el('div', 'v', v));
+        t.appendChild(el('div', 'k', k));
+        tiles.appendChild(t);
+      });
+    b.appendChild(tiles);
+  }
+
+  if (data.findings && data.findings.length) {
+    const fs = el('div', 'findings');
+    data.findings.forEach(f => {
+      const d = el('div', 'finding ' + f.severity);
+      const h = el('div', 'f-head');
+      h.appendChild(el('span', 'sev', f.severity));
+      h.appendChild(el('span', 'f-lane', f.lane + ' lane'));
+      d.appendChild(h);
+      d.appendChild(el('div', 'f-prov', f.instrument + ' — ' + f.provision));
+      d.appendChild(el('div', 'f-text', f.statement));
+      if (f.citations && f.citations.length) {
+        const c = el('div', 'cites');
+        f.citations.forEach(x => c.appendChild(citeButton(x)));
+        d.appendChild(c);
+      }
+      (f.autofix || []).forEach(x => {
+        const fx = el('div', 'f-fix' + (x.available ? '' : ' no'));
+        fx.textContent = (x.available ? 'FIX · ' : 'FIX (unavailable) · ')
+          + x.id + ' — ' + x.description;
+        d.appendChild(fx);
+      });
+      fs.appendChild(d);
+    });
+    b.appendChild(fs);
+  }
+
+  if (data.obligations && data.obligations.length) {
+    b.appendChild(grid('What you must do', ['Provision', 'Duty', 'Discharged by', 'When'],
+      data.obligations.map(o => [
+        {v: o.provision, mono: true}, {v: o.duty},
+        {v: o.discharged_by || '—'}, {v: o.when || '—'},
+      ])));
+  }
+
+  if (data.matrix && data.matrix.length) {
+    b.appendChild(grid('Jurisdiction matrix', ['Where', 'Status', 'Patentability', 'Next action', 'Cites'],
+      data.matrix.map(r => [
+        {v: r.jurisdiction, mono: true},
+        {v: r.status, st: true},
+        {v: r.patentability || '—'},
+        {v: r.next_action || '—'},
+        {v: String(r.citations), mono: true},
+      ])));
+  }
+
+  if (data.citations && data.citations.length) {
+    const c = el('div', 'cites');
+    data.citations.forEach(x => c.appendChild(citeButton(x)));
+    b.appendChild(c);
+  }
+
+  // Say what a pronoun was resolved to. The system guessed which earlier
+  // question you meant, and a guess you cannot see is a guess you cannot
+  // correct.
+  if (data.followup_of) {
+    b.insertBefore(
+      el('div', 'guard', 'Read as a follow-up to: “' +
+         data.followup_of + '”'),
+      b.children[1] || null);
+  }
+
+  // Say when the wording is a quotation by design rather than by failure.
+  if (data.guard) {
+    b.appendChild(el('div', 'guard', 'Quoted, not paraphrased — ' + data.guard));
+  }
+
+  if (data.dropped && data.dropped.length) {
+    const d = el('div', 'drops');
+    d.textContent = data.dropped.length +
+      ' sentence(s) removed by the citation gate — not supported by the ' +
+      'retrieved text: “' + data.dropped.join(' ').slice(0, 180) + '”';
+    b.appendChild(d);
+  }
+
+  const meta = el('div', 'meta');
+  if (data.abstained) {
+    meta.appendChild(el('span', 'pill abstain', 'abstained — no authority'));
+  } else if (data.groundedness !== null && data.groundedness !== undefined) {
+    // Two separate facts, shown separately. Groundedness says how well the
+    // text you are reading is carried by the provision it cites; the drop
+    // count says what the gate took out before you saw it. Folding them into
+    // one number told you neither.
+    const g = el('span', 'pill', 'groundedness ' + data.groundedness.toFixed(2));
+    g.title = 'Mean entailment of the sentences shown, against the spans of ' +
+      'the cited provisions. A traceability score, not a correctness score.';
+    meta.appendChild(g);
+    if (data.dropped && data.dropped.length) {
+      meta.appendChild(el('span', 'pill',
+        data.dropped.length + ' dropped by the gate'));
+    }
+  }
+  if (data.concept) meta.appendChild(el('span', 'pill', data.concept));
+  if (data.background) meta.appendChild(el('span', 'pill', 'background, not law'));
+  if (data.language_name && data.language_name !== 'English')
+    meta.appendChild(el('span', 'pill', data.language_name +
+      (data.localised === false ? ' · explanation in English' : '')));
+  if (data.summary) meta.appendChild(el('span', 'pill',
+    'C-BOM ' + data.summary.digest));
+  if (data.backend) meta.appendChild(el('span', 'pill', data.backend));
+  if (meta.children.length) b.appendChild(meta);
+
+  m.appendChild(b);
+  thread.appendChild(m);
+  scroll();
+}
+
+// The regulatory category, or the question still needed to reach it. The
+// classification is what decides the IP posture, so it is rendered as its own
+// block with the provisions that define the category attached.
+function classBlock(k) {
+  const box = el('div', 'klass' + (k.decided ? '' : ' ask'));
+
+  if (!k.decided) {
+    box.appendChild(el('h4', null, 'Classification — one thing still needed'));
+    const ol = el('ol');
+    (k.ask || []).forEach(q => ol.appendChild(el('li', null, q)));
+    box.appendChild(ol);
+    box.appendChild(el('div', 'why',
+      'The category decides the IP posture: the same herbs are unpatentable '
+      + 'traditional knowledge as a classical churna and a defensible '
+      + 'invention as a standardised fraction.'));
+    return box;
+  }
+
+  box.appendChild(el('h4', null, 'Regulatory category'));
+  box.appendChild(el('div', 'cat', k.label));
+  if (k.because) box.appendChild(el('div', 'why', 'because ' + k.because));
+
+  const dl = el('dl');
+  [['Requires', k.requires], ['IP posture', k.ip], ['ABS posture', k.abs]]
+    .forEach(([label, body]) => {
+      if (!body) return;
+      dl.appendChild(el('dt', null, label));
+      dl.appendChild(el('dd', null, body));
+    });
+  box.appendChild(dl);
+
+  if (k.citations && k.citations.length) {
+    const c = el('div', 'cites');
+    c.appendChild(el('div', 'cite-head-label', 'What defines this category:'));
+    k.citations.forEach(x => c.appendChild(citeButton(x)));
+    box.appendChild(c);
+  }
+
+  // Where the governing regulation is known but is not in the corpus, say so rather than let the absence pass unnoticed.
+  if (k.uncited_authority) {
+    box.appendChild(el('div', 'note', k.uncited_authority));
+  }
+  return box;
+}
+
+// A small table, because obligations and the jurisdiction matrix are rows of
+// facts and reading them as prose loses the shape.
+function grid(title, heads, rows) {
+  const sect = el('div', 'sect');
+  sect.appendChild(el('h4', null, title));
+  const wrap = el('div', 'scroll-x');
+  const t = el('table', 'grid');
+  const thead = el('thead'), tr = el('tr');
+  heads.forEach(h => tr.appendChild(el('th', null, h)));
+  thead.appendChild(tr); t.appendChild(thead);
+  const tb = el('tbody');
+  rows.forEach(cells => {
+    const r = el('tr');
+    cells.forEach(c => {
+      const td = el('td', c.mono ? 'mono' : null);
+      if (c.st) td.appendChild(el('span', 'st ' + tone(c.v), c.v));
+      else td.textContent = c.v;
+      r.appendChild(td);
+    });
+    tb.appendChild(r);
+  });
+  t.appendChild(tb); wrap.appendChild(t); sect.appendChild(wrap);
+  return sect;
+}
+
+function tone(v) {
+  const s = String(v).toUpperCase();
+  if (/BLOCK|BARRED|EXCLUD|NOT_|NO$|FAIL|REFUS/.test(s)) return 'no';
+  if (/CLEAR|OK|ALLOW|ELIGIBLE|AVAILABLE|PASS|YES/.test(s)) return 'yes';
+  if (/COND|CAUTION|REVIEW|PARTIAL|LIKELY|RISK|WARN/.test(s)) return 'maybe';
+  return '';
+}
+
+// Which body of law the answer was resolved against. The two layers are
+// retrieved separately, so the badge is a statement of fact about the answer,
+// not decoration.
+function layerBadge(layer) {
+  const intl = layer !== 'IN';
+  return el('div', 'layer' + (intl ? ' intl' : ''),
+    intl ? 'International layer — treaty & foreign regulator'
+         : 'India layer — national law');
+}
+
+function citeButton(x) {
+  const btn = el('button', 'cite');
+  btn.type = 'button';
+  const title = el('div', 'cite-title');
+  title.textContent = x.instrument + ' — ' + x.provision;
+  if (x.jurisdiction && x.jurisdiction !== 'IN') {
+    title.appendChild(el('span', 'juris', x.jurisdiction));
+  }
+  btn.appendChild(title);
+  btn.appendChild(el('div', 'cite-src',
+    x.pdf + ' p.' + x.page + '  ·  ' + x.corpus_id));
+  // A treaty binds India as a state without being enforceable in an Indian
+  // court. Saying so next to the citation is the difference between informing
+  // and misleading.
+  if (x.force) btn.appendChild(el('div', 'force', x.force));
+  btn.onclick = () => { lastCite = btn; openSource(x.corpus_id, x.quote); };
+  return btn;
+}
+
+async function openSource(id, quote) {
+  const r = await fetch('/api/provision/' + encodeURIComponent(id));
+  if (!r.ok) return;
+  const p = await r.json();
+  document.getElementById('dlg-title').textContent =
+    p.act_title + ' — Section ' + p.section;
+  document.getElementById('dlg-src').textContent =
+    p.hierarchy + '  ·  ' + p.pdf + ' pp.' + p.page_start + '–' + p.page_end +
+    (p.retrieved_on ? '  ·  extracted ' + p.retrieved_on : '');
+  const body = document.getElementById('dlg-body');
+  body.innerHTML = highlight(p.text, quote);
+  dlg.showModal();
+  // A provision can run for pages; land the reader on the span the answer
+  // actually leaned on rather than at the top of the section.
+  const hit = body.querySelector('mark');
+  if (hit) hit.scrollIntoView({block: 'center'});
+  else body.scrollTop = 0;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function highlight(text, quote) {
+  const safe = esc(text);
+  if (!quote) return safe;
+  // Mark the span the answer actually leaned on. Statutory text is full of
+  // regex metacharacters -- "(p)", "10(4)(d)(D)" -- so the quote has to be
+  // escaped before it is used as a pattern, or the match silently fails on
+  // exactly the provisions that matter. Whitespace stays flexible because
+  // the PDF extraction wraps lines mid-sentence.
+  const key = esc(quote.trim().slice(0, 90))
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/\s+/g, '\\s+');
+  try {
+    return safe.replace(new RegExp(key, 'i'), m => '<mark>' + m + '</mark>');
+  } catch (e) { return safe; }
+}
+
+let lastCite = null;
+document.getElementById('dlg-close').onclick = () => dlg.close();
+dlg.addEventListener('close', () => { if (lastCite) lastCite.focus(); });
+
+const mainEl = document.querySelector('main');
+const jump = el('button', 'jump', 'Jump to latest ↓');
+jump.type = 'button';
+jump.hidden = true;
+jump.onclick = () => { pinned = true; jump.hidden = true; scroll(true); };
+let pinned = true;
+
+function atBottom() {
+  return mainEl.scrollHeight - mainEl.scrollTop - mainEl.clientHeight < 90;
+}
+
+// Tokens arrive for tens of seconds. If the reader has scrolled up to open a
+// provision, forcing them back to the bottom on every token makes the answer
+// unreadable -- so follow only while they are already at the bottom.
+mainEl.addEventListener('scroll', () => {
+  pinned = atBottom();
+  jump.hidden = pinned || !busy;
+});
+
+function scroll(force) {
+  if (!force && !pinned) { if (busy) jump.hidden = false; return; }
+  mainEl.scrollTop = mainEl.scrollHeight;
+}
+
+async function ask() {
+  const text = q.value.trim();
+  if (!text || busy) return;
+  busy = true; send.disabled = true; send.textContent = 'Working…';
+  thread.setAttribute('aria-busy', 'true');
+  pinned = true; jump.hidden = true;
+  document.getElementById('intro')?.remove();
+  addUser(text);
+  q.value = ''; q.style.height = 'auto';
+
+  // The bubble is created up front and filled as events arrive, so the user
+  // sees the citation before a single word of prose has been written.
+  const m = el('div', 'msg bot');
+  const b = el('div', 'bubble');
+  b.appendChild(el('div', 'who', 'ayurlex'));
+  const status = el('div', 'thinking');
+  const bars = el('div', 'bars');
+  bars.innerHTML = '<i></i><i></i><i></i>';
+  const label = el('span', 'label', 'searching the corpus…');
+  const clock = el('span', 'elapsed', '0.0s');
+  status.append(bars, label, clock);
+  const t0 = Date.now();
+  const tick = setInterval(() => {
+    clock.textContent = ((Date.now() - t0) / 1000).toFixed(1) + 's';
+  }, 100);
+  const draft = el('p', 'draft');
+  draft.hidden = true;
+  const citeBox = el('div', 'cites');
+  citeBox.hidden = true;
+  b.append(status, citeBox, draft);
+  m.appendChild(b);
+  thread.appendChild(m);
+  scroll();
+
+  try {
+    const r = await fetch('/api/chat/stream', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: text, session_id: sessionId}),
+    });
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream: true});
+      const frames = buf.split('\n\n');
+      buf = frames.pop();
+      for (const frame of frames) {
+        const ev = /event:\s*(\w+)/.exec(frame);
+        const dt = /data:\s*([\s\S]*)$/m.exec(frame);
+        if (!ev || !dt) continue;
+        let data; try { data = JSON.parse(dt[1]); } catch (e) { continue; }
+        handleEvent(ev[1], data, {m, b, status, label, draft, citeBox});
+      }
+    }
+  } catch (e) {
+    m.remove();
+    addBot({intent: 'ERROR', text: 'The server did not respond. Is it still running?'});
+  } finally {
+    clearInterval(tick);
+    busy = false; send.disabled = false; send.textContent = 'Send';
+    thread.setAttribute('aria-busy', 'false');
+    jump.hidden = true;
+    q.focus();
+  }
+}
+
+function handleEvent(kind, data, ui) {
+  if (kind === 'start') { sessionId = data.session_id; return; }
+
+  if (kind === 'status') {
+    const label = {
+      retrieving: 'searching the corpus…',
+      drafting: 'drafting with ' + (data.model || 'the local model') +
+                (data.language && data.language !== 'English'
+                  ? ' · in English, for verification' : '') + '…',
+      verifying: 'verifying every sentence against the cited text…',
+      'polarity-guard': 'this answer turns on whether a duty applies — quoting '
+                        + 'the provision instead of paraphrasing it…',
+      localising: 'rendering the verified answer in ' +
+                  (data.language || 'your language') + '…',
+      'llm-unavailable': 'local model unavailable — quoting the provision directly',
+      'llm-failed': 'local model failed — quoting the provision directly',
+    }[data.stage] || data.stage;
+    (ui.label || ui.status).textContent = label;
+    scroll();
+    return;
+  }
+
+  if (kind === 'citations') {
+    if (data.translated) {
+      const t = el('div', 'taxa');
+      t.textContent = 'searched as: ' + data.translated;
+      ui.b.insertBefore(t, ui.citeBox);
+    }
+    if (data.taxa && data.taxa.length) {
+      const t = el('div', 'taxa');
+      t.innerHTML = 'resolved: ' + data.taxa
+        .map(x => '<b>' + esc(x.input) + '</b> → ' + esc(x.taxon)).join(' · ');
+      ui.b.insertBefore(t, ui.citeBox);
+    }
+    if (data.layer) {
+      ui.b.insertBefore(layerBadge(data.layer), ui.citeBox);
+    }
+    if (data.citations && data.citations.length) {
+      ui.citeBox.hidden = false;
+      const head = el('div', 'cite-head-label',
+        data.background ? 'Background material (not law):' : 'Authority for this answer:');
+      ui.citeBox.appendChild(head);
+      data.citations.forEach(x => ui.citeBox.appendChild(citeButton(x)));
+      scroll();
+    }
+    return;
+  }
+
+  if (kind === 'token') {
+    ui.draft.hidden = false;
+    ui.draft.textContent += data.t;
+    scroll();
+    return;
+  }
+
+  if (kind === 'final') {
+    ui.status.remove();
+    ui.draft.remove();
+    ui.citeBox.remove();
+    ui.m.remove();
+    addBot(data);
+  }
+}
+
+send.onclick = ask;
+q.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); }
+});
+q.addEventListener('input', () => {
+  q.style.height = 'auto';
+  q.style.height = Math.min(q.scrollHeight, 140) + 'px';
+});
+document.querySelector('footer.composer').appendChild(jump);
+q.focus();
+</script>
+</body>
+</html>

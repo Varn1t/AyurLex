@@ -1,0 +1,18 @@
+# Normalise line endings in the repository, so a clone on Linux or macOS does
+# not show the whole tree as modified. Git stores LF and checks out whatever
+# the platform wants.
+* text=auto
+
+# Primary sources are binary and must never be touched by EOL conversion —
+# a single byte of "normalisation" in a PDF corrupts it, and PRAMANA verifies
+# citations by re-extracting from these files.
+*.pdf binary
+
+# Generated corpus is not committed (see .gitignore), but if it ever is,
+# keep it LF so digests stay stable across platforms.
+*.jsonl text eol=lf
+*.json  text eol=lf
+*.yaml  text eol=lf
+*.py    text eol=lf
+*.html  text eol=lf
+*.md    text eol=lf

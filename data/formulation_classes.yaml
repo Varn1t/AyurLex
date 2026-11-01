@@ -1,0 +1,157 @@
+# Formulation classification — the regulatory category decides the IP posture.
+#
+# The assistant classifies a formulation BEFORE advising on it, because
+# intellectual property for an Ayurvedic product is inseparable from how the
+# product is regulated. A classical formulation is traditional
+# knowledge facing the section 3(p) bar; the same herbs standardised into a
+# defined bio-active fraction are a phytopharmaceutical with genuine patent
+# potential and a clinical-evidence burden. Same plants, opposite advice.
+#
+# This file is data, not code, and every provision id in it is verified against
+# the corpus at load time exactly like a SUTRA rule or a concept: a category
+# pointing at a provision that does not resolve fails loudly instead of
+# quietly citing nothing.
+#
+#   asks       -- the minimum clarifying questions, in the order they decide
+#   provisions -- corpus ids (with optional clause pin) that DEFINE the category
+#   requires   -- the regulatory consequence
+#   ip         -- the intellectual-property posture
+#   abs        -- the access-and-benefit-sharing posture
+#
+# Order matters: the first category whose test passes wins, so the narrower
+# categories are listed first.
+
+- id: PHYTOPHARMACEUTICAL
+  label: Phytopharmaceutical drug
+  when: purified_fraction
+  provisions:
+    - 'IN.DC_RULES.1945::R2(eb)'
+    - 'IN.DC_RULES.1945::R122E'
+  requires: >
+    A purified and standardised fraction with defined bio-active constituents
+    is a phytopharmaceutical drug, and is treated as a new drug: the Rule 122E
+    route applies, with the safety and efficacy data set out for
+    phytopharmaceuticals.
+  ip: >
+    The strongest patent position of any category here. Standardisation,
+    a defined fraction and a demonstrated effect are the facts that answer the
+    Section 3(p) traditional-knowledge objection and the Section 3(e) mere-
+    admixture objection, because the claimed invention is no longer the
+    traditional combination.
+  abs: >
+    Unchanged and unavoidable: the material is still a biological resource
+    obtained from India, so Section 6(1) approval before the IP application and
+    Section 7 intimation still bind.
+
+- id: CLASSICAL
+  label: Classical / generic ASU medicine
+  when: classical_text_formulation
+  provisions:
+    - 'IN.DCA.1940::S3(a)'
+    - 'IN.DC_RULES.1945::R153'
+    - 'IN.DC_RULES.1945::R154'
+  requires: >
+    A medicine whose formulation and manufacturing method are both drawn from a
+    First Schedule authoritative text. Manufacture is licensed on Form 25-D
+    (applied for on Form 24-D); for textual indications no safety and
+    effectiveness study is required.
+  ip: >
+    The weakest patent position. The formulation is codified traditional
+    knowledge, squarely within the Section 3(p) exclusion, and the TKDL exists
+    to defeat exactly such an application. The realistic protection is a trade
+    mark on the brand, a GI where the product is region-specific, and copyright
+    or design rights in the packaging — not a patent on the composition.
+  abs: >
+    Section 6(1), Section 7 and Section 21 apply to the biological resources
+    used, whatever the IP outcome.
+
+- id: PATENT_PROPRIETARY
+  label: Patent or proprietary ASU medicine
+  when: authoritative_ingredients_new_formula
+  provisions:
+    - 'IN.DCA.1940::S3(h)'
+    - 'IN.DC_RULES.1945::R158#part2'
+  requires: >
+    A formulation containing only ingredients named in the authoritative books,
+    but which is not itself a formula described in those books. Licensed as an
+    ASU drug; where the indication is not a textual one, safety and
+    effectiveness data are required.
+  ip: >
+    Intermediate. The individual ingredients are traditional knowledge, so a
+    claim to the combination alone invites both Section 3(p) and Section 3(e).
+    A patent becomes arguable only on evidence of synergy — an effect the known
+    properties of the components do not predict — or on a novel process.
+  abs: >
+    Section 6(1), Section 7 and Section 21 apply, and Section 10(4)(d)(D)
+    requires the source and geographical origin of each biological material to
+    be disclosed in the complete specification.
+
+- id: NEW_DRUG
+  label: New / non-classical drug
+  when: novel_therapeutic_claim
+  provisions:
+    - 'IN.DC_RULES.1945::R122E'
+    - 'IN.DC_RULES.1945::R158#part2'
+  requires: >
+    A drug not used in the country to any significant extent for the proposed
+    indication is a new drug, and must generate proof of safety and
+    effectiveness for that indication.
+  ip: >
+    Genuine patent potential, because novelty is being asserted on the facts
+    rather than argued around the traditional-knowledge bar — but the clinical
+    evidence burden is the real cost, and publishing that evidence before filing
+    destroys novelty. File first, publish second.
+  abs: >
+    Section 6(1), Section 7 and Section 21 apply to any Indian biological
+    resource used.
+
+- id: COSMETIC
+  label: Cosmetic
+  when: cosmetic_use_no_disease_claim
+  provisions:
+    - 'IN.DCA.1940::S3(aaa)'
+  requires: >
+    An article applied to the body for cleansing, beautifying or altering
+    appearance, and making no disease claim, is a cosmetic rather than a drug.
+    The moment a disease claim is made it is a drug, and the advertising
+    provisions bite.
+  ip: >
+    The composition is rarely patentable, but this is the category where design
+    registration on the container and shape, and trade mark protection on the
+    brand, carry the most commercial weight.
+  abs: >
+    Section 6(1), Section 7 and Section 21 still apply — the ABS duties follow
+    the biological resource, not the product category.
+
+- id: AYURVEDA_AAHARA
+  label: Ayurveda Aahara / nutraceutical
+  when: food_positioning
+  # The FSS Act and the Ayurveda Aahara Regulations are now in the corpus, so
+  # this category cites its own governing instrument instead of declaring the
+  # gap. Regulation 8 leads because it is the boundary that decides the
+  # category: the moment the label claims to prevent, treat or cure a disease
+  # the product is not Ayurveda Aahara at all, and the drug and advertising
+  # regimes bite instead.
+  provisions:
+    - 'IN.FSS_AAHARA.2022::R8'
+    - 'IN.FSS_AAHARA.2022::R3'
+    - 'IN.FSS_AAHARA.2022::R7'
+    - 'IN.FSSA.2006::S31'
+    - 'IN.DCA.1940::S3(a)'
+  requires: >
+    Positioned as a food rather than a medicine, this falls under the Food
+    Safety and Standards (Ayurveda Aahara) Regulations, 2022, administered by
+    FSSAI, and outside the ASU drug licensing route. The formulation must
+    follow a recipe drawn from an authoritative Ayurveda text listed in
+    Schedule A and a category in Schedule B; the food business needs an FSSAI
+    licence under Section 31 of the Food Safety and Standards Act, 2006, not an
+    ASU manufacturing licence; and the labelling, presentation and advertising
+    must not claim to prevent, treat or cure a human disease. A claim that
+    crosses that line takes the product out of this category and into the drug
+    regime, where the Drugs and Magic Remedies Act, 1954 also applies.
+  ip: >
+    No patent on the traditional composition; trade mark and, where the product
+    is region-specific, a GI are the practical protections.
+  abs: >
+    Section 6(1), Section 7 and Section 21 apply to the biological resources
+    used.

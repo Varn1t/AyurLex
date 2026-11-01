@@ -1,0 +1,149 @@
+# SUTRA -- The Biological Diversity Act, 2002
+#
+# Anchors are verbatim from Dataset/The_Biological_Diversity_Act_2002.pdf.
+# Note that s.7 carries a proviso exempting local people and communities,
+# growers and cultivators, and vaids and hakims practising indigenous medicine.
+# The proviso is part of the same chunk (we never split a proviso from its
+# parent), and the rule below tests it rather than ignoring it -- getting this
+# backwards would tell a practising vaidya to file something they need not file.
+
+- id: IN.BDA.S6.IPR_PRIOR_APPROVAL
+  jurisdiction: IN
+  lane: ACCESS
+  instrument: "The Biological Diversity Act, 2002"
+  provision: "Section 6(1)"
+  severity: BLOCKER
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: bioresource.uses_indian_biological_resource
+        eq: true
+      - fact: filing.intent
+        not_in: [NONE]
+      - fact: evidence.nba_approval_obtained
+        eq: false
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.BDA.2002::S6
+      provision: "Section 6(1)"
+      anchor: >-
+        No person shall apply for any intellectual property right, by whatever
+        name called, in or outside India for any invention based on any research
+        or information on a biological resource obtained from India without
+        obtaining the previous approval of the National Biodiversity Authority
+        before making such application
+  statement_template: >-
+    The invention is based on biological resources obtained from India
+    ({{ resolution.taxa }}) and an intellectual property application is
+    intended, but no National Biodiversity Authority approval is on record.
+    Section 6(1) of the Biological Diversity Act, 2002 requires previous
+    approval before making such an application. The section's first proviso
+    allows a patent applicant to obtain that permission after acceptance but
+    before sealing -- it does not remove the requirement.
+  obligation:
+    duty: >-
+      Obtain National Biodiversity Authority approval for the intellectual
+      property application based on Indian biological resources.
+    discharged_by: "NBA approval under Section 6"
+    when: "before making the application (patents: before sealing)"
+  autofix:
+    - id: OBTAIN_NBA_APPROVAL
+      description: >-
+        Apply to the National Biodiversity Authority for approval under Section
+        6 before filing, and record the approval reference in the C-BOM.
+      sets_facts:
+        evidence.nba_approval_obtained: true
+      expected_effect: "IN.BDA.S6.IPR_PRIOR_APPROVAL no longer fires"
+    - id: CONFIRM_NON_INDIAN_SOURCING
+      description: >-
+        If every constituent is in fact sourced outside India, record the
+        sourcing evidence per ingredient; the section is keyed to a biological
+        resource obtained from India.
+      sets_facts:
+        bioresource.uses_indian_biological_resource: false
+      expected_effect: "Takes the formulation outside the section's trigger"
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/nba_approved.json
+      expect_fires: false
+
+- id: IN.BDA.S7.PRIOR_INTIMATION_SBB
+  jurisdiction: IN
+  lane: ACCESS
+  instrument: "The Biological Diversity Act, 2002"
+  provision: "Section 7"
+  severity: WARNING
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: bioresource.uses_indian_biological_resource
+        eq: true
+      - fact: applicant.is_exempt_practitioner
+        eq: false
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.BDA.2002::S7
+      provision: "Section 7"
+      anchor: >-
+        shall obtain any biological resource for commercial utilisation, or
+        bio-survey and bio-utilisation for commercial utilisation except after
+        giving prior intimation to the State Biodiversity Board concerned
+  statement_template: >-
+    Obtaining an Indian biological resource for commercial utilisation requires
+    prior intimation to the State Biodiversity Board concerned. Section 7 of the
+    Biological Diversity Act, 2002 carries a proviso excluding local people and
+    communities of the area, including growers and cultivators of biodiversity,
+    and vaids and hakims practising indigenous medicine -- the applicant profile
+    on record ({{ filing.applicant_type }}) does not fall within it.
+  obligation:
+    duty: "Give prior intimation to the State Biodiversity Board concerned."
+    discharged_by: "Form of intimation to the State Biodiversity Board"
+    when: "before obtaining the biological resource for commercial utilisation"
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/vaidya_practitioner.json
+      expect_fires: false
+
+- id: IN.BDA.S21.BENEFIT_SHARING
+  jurisdiction: IN
+  lane: ACCESS
+  instrument: "The Biological Diversity Act, 2002"
+  provision: "Section 21(1)"
+  severity: INFO
+  effective_from: null
+  effective_to: null
+  when:
+    all:
+      - fact: bioresource.uses_indian_biological_resource
+        eq: true
+      - fact: filing.intent
+        not_in: [NONE]
+  citations:
+    - kind: STATUTE
+      corpus_id: IN.BDA.2002::S21
+      provision: "Section 21(1)"
+      anchor: >-
+        secures equitable sharing of benefits arising out of the use of accessed
+        biological resources, their by-products, innovations and practices
+        associated with their use and applications and knowledge relating thereto
+  statement_template: >-
+    Where approval is granted, Section 21(1) of the Biological Diversity Act,
+    2002 requires the terms of that approval to secure equitable sharing of the
+    benefits arising from the accessed biological resources and the knowledge
+    associated with them, on mutually agreed terms. Budget for benefit sharing
+    as a term of the approval rather than as an afterthought.
+  obligation:
+    duty: >-
+      Agree benefit-sharing terms covering the accessed resources and associated
+      knowledge.
+    discharged_by: "Benefit-sharing terms in the NBA approval"
+    when: "as a condition of approval"
+  test_cases:
+    - fixture: fixtures/triphala_classical.json
+      expect_fires: true
+    - fixture: fixtures/no_filing_intent.json
+      expect_fires: false

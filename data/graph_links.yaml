@@ -1,0 +1,260 @@
+# SAMBANDHA — curated cross-instrument links.
+#
+# Everything else in the knowledge graph is derived mechanically: a provision
+# belongs to its instrument, a rule cites what its YAML declares, a concept
+# governs the provisions listed against it, and a provision cross-refers to
+# whatever section number appears in its own text. Those edges cannot be wrong
+# because nobody wrote them.
+#
+# This file holds the edges that DO need a human: the relationship between an
+# international obligation and the domestic provision that gives it effect.
+# "The Biological Diversity Act implements India's CBD access-and-benefit-
+# sharing obligations" is a legal proposition, not a string match, and an
+# assistant that asserts it must be able to show why.
+#
+# So every link is held to the same gate as a SUTRA rule:
+#
+#   * both endpoints must resolve to real extracted provisions, and
+#   * each declared anchor must be a verbatim substring of its endpoint.
+#
+# A link that fails either check is dropped and reported, never silently kept.
+# That is the difference between a knowledge graph and a diagram.
+#
+# IMPORTANT — what these edges do NOT say. `implemented_by` means the domestic
+# provision is the route through which the international obligation has effect
+# in India. It does not mean the two are interchangeable, and the graph never
+# lets an answer cite them as one authority: the jurisdiction pre-filter still
+# separates the layers. The edge exists so the assistant can say "that duty
+# reaches you through this section" — which is exactly the question a founder
+# asks when told India is a Party to something.
+#
+#   relation      -- implemented_by | informs | corresponds_to
+#   from / to     -- corpus ids, verified at load
+#   *_anchor      -- verbatim span, verified at load
+#   note          -- what the edge asserts, in one sentence, for the answer
+
+- id: LINK.CBD15.BDA
+  relation: implemented_by
+  from: CBD.1992::A15
+  to: IN.BDA.2002::S3
+  from_anchor: >-
+    the authority to determine access to genetic resources rests with the
+    national governments and is subject to national legislation
+  note: >-
+    Article 15 of the Convention leaves access to genetic resources to national
+    legislation. In India that legislation is the Biological Diversity Act, and
+    Section 3 is the provision that requires prior approval before a
+    non-Indian person obtains a biological resource occurring in India.
+
+- id: LINK.NAGOYA5.BDA21
+  relation: implemented_by
+  from: CBD.NAGOYA.2010::A5
+  to: IN.BDA.2002::S21
+  from_anchor: >-
+    shall be shared in a fair and equitable way with the Party providing such
+    resources
+  to_anchor: >-
+    secures equitable sharing of benefits arising out of the use of accessed
+    biological resources
+  note: >-
+    The Protocol's fair-and-equitable benefit-sharing obligation is discharged
+    in India through Section 21, under which the National Biodiversity
+    Authority determines benefit sharing as a condition of approval.
+
+- id: LINK.NAGOYA7.BDA6
+  relation: informs
+  from: CBD.NAGOYA.2010::A7
+  to: IN.BDA.2002::S6
+  from_anchor: >-
+    traditional knowledge associated with genetic resources that is held by
+    indigenous and local communities is accessed with the prior and informed
+    consent
+  to_anchor: >-
+    without obtaining the previous approval of the National Biodiversity
+    Authority before making such application
+  note: >-
+    Article 7 addresses access to traditional knowledge associated with genetic
+    resources. Section 6 is the Indian control point an applicant actually
+    meets: no intellectual property application on an invention based on Indian
+    biological resources without previous approval.
+
+- id: LINK.GRATK3.PAT10
+  relation: corresponds_to
+  from: WIPO.GRATK.2024::A3
+  to: IN.PATENTS.1970::S10
+  from_anchor: >-
+    Contracting Party shall require applicants to disclose
+  to_anchor: >-
+    disclose the source and geographical origin of the biological material in
+    the specification
+  note: >-
+    The 2024 WIPO GRATK Treaty introduces a disclosure requirement for patent
+    applications based on genetic resources. India already carries an
+    equivalent duty in Section 10(4)(d)(D), so the treaty largely codifies
+    internationally a requirement Indian applicants already meet.
+
+- id: LINK.TRIPS27.PAT3
+  relation: informs
+  from: WTO.TRIPS.1994::A27
+  to: IN.PATENTS.1970::S3
+  from_anchor: >-
+    patents shall be available for any inventions, whether products or
+    processes, in all fields of technology
+  to_anchor: >-
+    What are not inventions
+  note: >-
+    Article 27 sets the floor for patentable subject matter and the permitted
+    exclusions from it. Section 3 is where India states its exclusions,
+    including the Section 3(p) traditional-knowledge bar that decides most
+    Ayurvedic composition claims.
+
+- id: LINK.TRIPS22.GI9
+  relation: implemented_by
+  from: WTO.TRIPS.1994::A22
+  to: IN.GI.1999::S9
+  from_anchor: >-
+    Geographical indications are, for the purposes of this Agreement,
+    indications which identify a good as originating in the territory of a
+    Member
+  to_anchor: >-
+    shall not be registered as a geographical indication
+  note: >-
+    India's geographical-indications regime was enacted to meet the TRIPS
+    Part II Section 3 obligations; the GI Act is where the protection actually
+    bites for an Ayurvedic product tied to a region.
+
+- id: LINK.TRIPS15.TM9
+  relation: implemented_by
+  from: WTO.TRIPS.1994::A15
+  to: IN.TM.1999::S9
+  from_anchor: >-
+    capable of distinguishing the goods or services of one undertaking from
+    those of other undertakings
+  to_anchor: >-
+    which are devoid of any distinctive character
+  note: >-
+    TRIPS Article 15 defines what must be capable of being a trademark;
+    Section 9 of the Trade Marks Act is the Indian absolute-grounds test that
+    a churna brand name has to pass.
+
+- id: LINK.PCT11.PAT7
+  relation: implemented_by
+  from: WIPO.PCT.1970::A11
+  to: IN.PATENTS.1970::S7
+  from_anchor: >-
+    The receiving Office shall accord as the international filing date the
+    date of receipt of the international application
+  to_anchor: >-
+    Every international application under the Patent Cooperation Treaty for a
+    patent, as may be filed designating India, shall be deemed to be an
+    application under this Act
+  note: >-
+    Section 7(1A) and 7(1B) are the hinge between the PCT and Indian
+    prosecution: an international application designating India is deemed an
+    application under the Act, and takes the international filing date.
+
+# ---------------------------------------------------------------------------
+# The 2023 amendment.
+#
+# AMENDED_BY is the one relation here that a user asks for by name. "Is section
+# 6 still what it says?" cannot be answered from section 6, because a
+# consolidated text of the Biological Diversity Act as amended is not something
+# anybody published -- so the corpus holds the 2002 Act and the 2023 amending
+# Act separately, and this edge is what joins them. Without it the assistant
+# would quote a sub-section that Parliament replaced in 2023 and give no sign.
+# ---------------------------------------------------------------------------
+- id: LINK.BDA6.AMEND2023
+  relation: amended_by
+  from: IN.BDA.2002::S6
+  to: IN.BDA_AMEND.2023::S8
+  from_anchor: >-
+    No person shall apply for any intellectual property right, by whatever name
+    called, in or outside India
+  to_anchor: >-
+    for sub-section (1), the following sub-sections shall be substituted
+  note: >-
+    Section 8 of the Biological Diversity (Amendment) Act, 2023 substituted
+    sub-section (1) of Section 6. The bar now falls on persons and entities
+    covered by sub-section (2) of Section 3, reaches resources deposited in
+    repositories outside India and traditional knowledge associated with them,
+    and bites before the grant of the right rather than before the application.
+
+- id: LINK.BDA7.AMEND2023
+  relation: amended_by
+  from: IN.BDA.2002::S7
+  to: IN.BDA_AMEND.2023::S9
+  # The anchor stops short of the full proviso on purpose. The gazette sets the
+  # marginal notes in the same text column, so PyMuPDF splices "resource for
+  # certain" and "purposes." into the middle of this sentence. The anchor has
+  # to be a span that survives that, not the sentence as a lawyer would quote
+  # it -- and the load-time gate is what forced the correction.
+  to_anchor: >-
+    cultivated medicinal plants and its products, local people and
+  note: >-
+    Section 9 of the Biological Diversity (Amendment) Act, 2023 replaced
+    Section 7 outright. The substituted section carries an express exemption
+    for codified traditional knowledge, cultivated medicinal plants, local
+    communities, growers and cultivators, and vaids, hakims and registered
+    AYUSH practitioners — which is the provision most often asked about by an
+    Ayurvedic manufacturer.
+
+- id: LINK.NAGOYA6.BDRULES13
+  relation: implemented_by
+  from: CBD.NAGOYA.2010::A6
+  to: IN.BD_RULES.2024::R13
+  from_anchor: >-
+    access to genetic resources for their utilization shall be subject to the
+    prior informed consent of the Party providing such resources
+  to_anchor: >-
+    seeking approval of the Authority for access to biological resources and
+    knowledge associated thereto
+  note: >-
+    The Protocol's prior-informed-consent requirement is worked out in India as
+    a procedure: Rule 13 of the Biological Diversity Rules, 2024 is the form,
+    fee and route by which that consent is actually applied for.
+
+# ---------------------------------------------------------------------------
+# Where the food regime and the drug regime meet.
+#
+# This is the single most consequential boundary for an Ayurvedic manufacturer,
+# and it is a boundary rather than an overlap: the same bottle is a food or a
+# drug depending on what its label claims, and the two answers share nothing.
+# The edge exists so that a question asked on one side can be told what happens
+# on the other, without either instrument being cited as authority for the
+# other's requirements.
+# ---------------------------------------------------------------------------
+- id: LINK.AAHARA8.DMR3
+  relation: corresponds_to
+  from: IN.FSS_AAHARA.2022::R8
+  to: IN.DMR.1954::S3
+  from_anchor: >-
+    The labelling, presentation and advertisement shall not claim that the
+    Ayurveda Aahara has the property of preventing, treating or curing a human
+    disease
+  to_anchor: >-
+    the diagnosis, cure, mitigation, treatment or prevention of any disease,
+    disorder or condition specified in the Schedule
+  note: >-
+    Regulation 8 is the line that keeps a product inside the Ayurveda Aahara
+    category: claim to prevent, treat or cure a disease and it is no longer a
+    food. The same claim, made about a drug, is what Section 3 of the Drugs and
+    Magic Remedies Act, 1954 prohibits outright for the scheduled conditions.
+    The two provisions are not alternatives — crossing the first line is what
+    brings the second provision into play.
+
+- id: LINK.FSSA31.AAHARA7
+  relation: informs
+  from: IN.FSSA.2006::S31
+  to: IN.FSS_AAHARA.2022::R7
+  from_anchor: >-
+    No person shall commence or carry on any food business except under a
+    licence
+  to_anchor: >-
+    No person shall manufacture, pack, sell, offer for sale, market or
+    otherwise distribute or import Ayurveda Aahara
+  note: >-
+    Two separate requirements that a maker meets together: the business needs
+    an FSSAI licence under Section 31 of the Food Safety and Standards Act,
+    2006, and the product must additionally comply with the Ayurveda Aahara
+    Regulations. Holding the licence does not satisfy Regulation 7, and
+    complying with the regulations does not remove the need for the licence.

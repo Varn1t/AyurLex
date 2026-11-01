@@ -142,12 +142,15 @@ def test_concept_vocabulary_is_carried_across_turns():
 
 # ---------------------------------------------------------- end to end ----
 def test_followup_answers_from_the_earlier_subject():
+    from rag.answer import ExtractiveAnswerer
     from rag.chat import respond
 
+    # Extractive backend: this tests follow-up resolution, not the model.
+    ex = ExtractiveAnswerer()
     s = Session()
     respond("What's the difference between a patent, GI, and trademark for "
-            "an Ayurvedic product?", s)
-    r = respond("what are their pros and cons", s)
+            "an Ayurvedic product?", s, backend=ex)
+    r = respond("what are their pros and cons", s, backend=ex)
     assert r.intent == "FOLLOW"
     assert not r.answer.abstained
     # It must reach the three regimes, not just whichever one the pronoun

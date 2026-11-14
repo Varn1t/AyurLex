@@ -774,8 +774,9 @@ Bhashini translation available, off unless configured
 
 ## License
 
-Code is [MIT](LICENSE). The PDFs in `Dataset/` are third-party primary
-sources under their publishers' own terms and are not covered by it.
+Code is All Rights Reserved — see [LICENSE](LICENSE). The PDFs in `Dataset/`
+are third-party primary sources under their publishers' own terms and are
+not covered by it.
 
 ## Author
 
